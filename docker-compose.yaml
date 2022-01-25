@@ -3,7 +3,8 @@ version: "3.9"
 services:
 
   timescaledb:
-    image: "timescale/timescaledb-ha:pg14-latest"
+    build:
+      context: ./timescaledb
     volumes:
       - timescaledb-data:/var/lib/postgresql/data
     ports:
