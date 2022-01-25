@@ -1,0 +1,4 @@
+FROM grafana/grafana-oss:8.3.3
+COPY grafana.ini /etc/grafana/grafana.ini
+COPY jaeger.yaml /usr/share/grafana/conf/provisioning/jaeger.yaml
+COPY timescaledb.yaml /usr/share/grafana/conf/provisioning/timescaledb.yaml
