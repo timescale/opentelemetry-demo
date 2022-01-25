@@ -1,4 +1,4 @@
-# Tracing Demo
+# OpenTelemetry Demo
 
 ## Summary
 
@@ -19,7 +19,7 @@ a [generator](./generator) service which makes calls to the other services
 to compose a random password. Finally, there is a [load script](./load) which
 continuously calls the generator service in order to simulate user load.
 
-## The Tracing Infrastructure
+## The Observability Infrastructure
 
 All of the microservices forward their traces to an instance of the 
 [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/).
