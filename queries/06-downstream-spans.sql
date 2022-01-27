@@ -170,7 +170,7 @@ GROUP BY 1, 2
 ORDER BY 1
 ;
 
--- time series graph
+-- table
 WITH RECURSIVE x AS
 (
     SELECT
@@ -186,7 +186,7 @@ WITH RECURSIVE x AS
             WHERE s.trace_id = z.trace_id
             AND s.span_id = z.parent_span_id
         ), 0.0) as duration_ms,
-        s.status_code = 'STATUS_CODE_ERROR' as is_err
+        s.status_code
     FROM ps_trace.span s
     WHERE $__timeFilter(s.start_time)
     AND s.service_name = '${service}'
@@ -205,7 +205,7 @@ WITH RECURSIVE x AS
             WHERE s.trace_id = z.trace_id
             AND s.span_id = z.parent_span_id
         ), 0.0) as duration_ms,
-        s.status_code = 'STATUS_CODE_ERROR' as is_err
+        s.status_code
     FROM x
     INNER JOIN ps_trace.span s
     ON (x.trace_id = s.trace_id
@@ -218,7 +218,7 @@ SELECT
     approx_percentile(0.5, percentile_agg(duration_ms)) as p50,
     approx_percentile(0.95, percentile_agg(duration_ms)) as p95,
     approx_percentile(0.99, percentile_agg(duration_ms)) as p99,
-    count(*) FILTER (WHERE x.is_err) as num_errors
+    count(*) FILTER (WHERE status_code = 'STATUS_CODE_ERROR') as num_errors
 FROM x
 GROUP BY 1, 2
 ORDER BY 3 DESC

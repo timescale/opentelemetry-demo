@@ -9,7 +9,7 @@ WHERE key = 'service.name'
 
 -- edges
 SELECT
-    p.service_name || '->' || k.service_name as id,
+    p.service_name || '->' || k.service_name || ':' || k.span_name as id,
     p.service_name as source,
     k.service_name as target,
     k.span_name as "mainStat",

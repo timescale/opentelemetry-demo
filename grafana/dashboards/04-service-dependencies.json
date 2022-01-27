@@ -76,7 +76,7 @@
           "hide": false,
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n    p.service_name || '->' || k.service_name as id,\n    p.service_name as source,\n    k.service_name as target,\n    k.span_name as \"mainStat\",\n    count(*) as \"secondaryStat\"\nFROM ps_trace.span p\nINNER JOIN ps_trace.span k\nON (p.trace_id = k.trace_id\nAND p.span_id = k.parent_span_id\nAND p.service_name != k.service_name)\nWHERE $__timeFilter(p.start_time)\nGROUP BY 1, 2, 3, 4",
+          "rawSql": "SELECT\n    p.service_name || '->' || k.service_name || ':' || k.span_name as id,\n    p.service_name as source,\n    k.service_name as target,\n    k.span_name as \"mainStat\",\n    count(*) as \"secondaryStat\"\nFROM ps_trace.span p\nINNER JOIN ps_trace.span k\nON (p.trace_id = k.trace_id\nAND p.span_id = k.parent_span_id\nAND p.service_name != k.service_name)\nWHERE $__timeFilter(p.start_time)\nGROUP BY 1, 2, 3, 4",
           "refId": "B",
           "select": [
             [
@@ -229,6 +229,6 @@
   "timezone": "",
   "title": "04 Service Dependencies",
   "uid": "scyq99J7k",
-  "version": 2,
+  "version": 5,
   "weekStart": ""
 }

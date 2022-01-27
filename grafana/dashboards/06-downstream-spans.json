@@ -21,8 +21,8 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 15,
-  "iteration": 1642734114199,
+  "id": 3,
+  "iteration": 1643312835417,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -377,7 +377,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "WITH RECURSIVE x AS\n(\n    SELECT\n        s.trace_id,\n        s.span_id,\n        s.parent_span_id,\n        s.service_name,\n        s.span_name,\n        s.duration_ms - coalesce(\n        (\n            SELECT sum(z.duration_ms)\n            FROM ps_trace.span z\n            WHERE s.trace_id = z.trace_id\n            AND s.span_id = z.parent_span_id\n        ), 0.0) as duration_ms,\n        s.status_code = 'STATUS_CODE_ERROR' as is_err\n    FROM ps_trace.span s\n    WHERE $__timeFilter(s.start_time)\n    AND s.service_name = '${service}'\n    AND s.span_name = '${operation}'\n    UNION ALL\n    SELECT\n        s.trace_id,\n        s.span_id,\n        s.parent_span_id,\n        s.service_name,\n        s.span_name,\n        s.duration_ms - coalesce(\n        (\n            SELECT sum(z.duration_ms)\n            FROM ps_trace.span z\n            WHERE s.trace_id = z.trace_id\n            AND s.span_id = z.parent_span_id\n        ), 0.0) as duration_ms,\n        s.status_code = 'STATUS_CODE_ERROR' as is_err\n    FROM x\n    INNER JOIN ps_trace.span s\n    ON (x.trace_id = s.trace_id\n    AND x.span_id = s.parent_span_id)\n)\nSELECT\n    service_name,\n    span_name as operation,\n    sum(duration_ms) as total_exec_time,\n    approx_percentile(0.5, percentile_agg(duration_ms)) as p50,\n    approx_percentile(0.95, percentile_agg(duration_ms)) as p95,\n    approx_percentile(0.99, percentile_agg(duration_ms)) as p99,\n    count(*) FILTER (WHERE x.is_err) as num_errors\nFROM x\nGROUP BY 1, 2\nORDER BY 3 DESC",
+          "rawSql": "WITH RECURSIVE x AS\n(\n    SELECT\n        s.trace_id,\n        s.span_id,\n        s.parent_span_id,\n        s.service_name,\n        s.span_name,\n        s.duration_ms - coalesce(\n        (\n            SELECT sum(z.duration_ms)\n            FROM ps_trace.span z\n            WHERE s.trace_id = z.trace_id\n            AND s.span_id = z.parent_span_id\n        ), 0.0) as duration_ms\n    FROM ps_trace.span s\n    WHERE $__timeFilter(s.start_time)\n    AND s.service_name = '${service}'\n    AND s.span_name = '${operation}'\n    UNION ALL\n    SELECT\n        s.trace_id,\n        s.span_id,\n        s.parent_span_id,\n        s.service_name,\n        s.span_name,\n        s.duration_ms - coalesce(\n        (\n            SELECT sum(z.duration_ms)\n            FROM ps_trace.span z\n            WHERE s.trace_id = z.trace_id\n            AND s.span_id = z.parent_span_id\n        ), 0.0) as duration_ms\n    FROM x\n    INNER JOIN ps_trace.span s\n    ON (x.trace_id = s.trace_id\n    AND x.span_id = s.parent_span_id)\n)\nSELECT\n    service_name,\n    span_name as operation,\n    sum(duration_ms) as total_exec_time,\n    approx_percentile(0.5, percentile_agg(duration_ms)) as p50,\n    approx_percentile(0.95, percentile_agg(duration_ms)) as p95,\n    approx_percentile(0.99, percentile_agg(duration_ms)) as p99\nFROM x\nGROUP BY 1, 2\nORDER BY 3 DESC",
           "refId": "A",
           "select": [
             [
@@ -413,7 +413,7 @@
       {
         "allValue": "ALL",
         "current": {
-          "selected": true,
+          "selected": false,
           "text": "generator",
           "value": "generator"
         },
@@ -455,13 +455,13 @@
     ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "06 Downstream Spans",
   "uid": "SdzI3eJnk",
-  "version": 10,
+  "version": 3,
   "weekStart": ""
 }
