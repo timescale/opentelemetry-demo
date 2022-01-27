@@ -64,6 +64,8 @@ psql -h localhost -p 5999 -d postgres -U postgres
 ```
 ## Examples
 
+_Note: the default Grafana login credentials are user "admin" and password "admin". Once you log in for the first time you will be asked to update your password._
+
 ### Request Rates
 
 [Grafana Dashboard](http://localhost:3000/d/QoZDH91nk/01-request-rate?orgId=1)
