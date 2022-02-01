@@ -64,13 +64,13 @@ def process_lower(c: str) -> str:
             work(0.0002, 0.0001)
         
         # these chars are extra slow
-        if c in {'Z', 'X', 'R',}:
+        if c in {'z', 'x', 'r',}:
             with tracer.start_as_current_span(f"extra_process_lower") as span:
                 span.set_attribute('char', c)
                 work(0.005, 0.0005)
         
         # these chars are extra slow too
-        if c in {'Z', 'A', 'T'}:
+        if c in {'z', 'a', 't'}:
             with tracer.start_as_current_span(f"extra_extra_process_lower") as span:
                 span.set_attribute('char', c)
                 work(0.0001, 0.00008)

@@ -217,8 +217,7 @@ SELECT
     sum(duration_ms) as total_exec_time,
     approx_percentile(0.5, percentile_agg(duration_ms)) as p50,
     approx_percentile(0.95, percentile_agg(duration_ms)) as p95,
-    approx_percentile(0.99, percentile_agg(duration_ms)) as p99,
-    count(*) FILTER (WHERE status_code = 'STATUS_CODE_ERROR') as num_errors
+    approx_percentile(0.99, percentile_agg(duration_ms)) as p99
 FROM x
 GROUP BY 1, 2
 ORDER BY 3 DESC
