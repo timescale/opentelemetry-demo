@@ -6,7 +6,7 @@ services:
     build:
       context: ./timescaledb
     volumes:
-      - timescaledb-data:/var/lib/postgresql/data
+      - timescaledb-data:/Users/jonatasdp/code/timescale/opentelemetry-demo
     ports:
       - 5999:5432/tcp
     environment:
@@ -80,7 +80,7 @@ services:
     depends_on:
       - collector
     ports:
-      - 5053:5000/tcp
+      - 4567:5000/tcp
 
   special:
     build:
