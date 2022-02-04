@@ -14,8 +14,11 @@ exporters:
       insecure: true
 
 service:
+  telemetry:
+    logs:
+      level: "debug"
   pipelines:
     traces:
-      receivers: [otlp]
+      receivers: [otlp, http]
       processors: [batch]
       exporters: [otlp]

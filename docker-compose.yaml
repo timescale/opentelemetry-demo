@@ -6,12 +6,12 @@ services:
     build:
       context: ./timescaledb
     volumes:
-      - timescaledb-data:/Users/jonatasdp/code/timescale/opentelemetry-demo
+      - timescaledb-data:/var/lib/postgresql/data
     ports:
       - 5999:5432/tcp
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_DB=postgres
+      - POSTGRES_DB=otel_demo
       - POSTGRES_HOST_AUTH_METHOD=trust
 
   promscale:
@@ -25,7 +25,7 @@ services:
     environment:
       PROMSCALE_DB_CONNECT_RETRIES: 10
       PROMSCALE_WEB_TELEMETRY_PATH: /metrics-text
-      PROMSCALE_DB_URI: postgres://postgres:password@timescaledb:5432/postgres?sslmode=allow
+      PROMSCALE_DB_URI: postgres://postgres:password@timescaledb:5432/otel_demo?sslmode=allow
       PROMSCALE_ENABLE_FEATURE: tracing
       PROMSCALE_OTLP_GRPC_SERVER_LISTEN_ADDRESS: 0.0.0.0:9202
 
@@ -80,7 +80,7 @@ services:
     depends_on:
       - collector
     ports:
-      - 4567:5000/tcp
+      - 5053:5000/tcp
 
   special:
     build:

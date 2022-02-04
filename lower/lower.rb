@@ -10,13 +10,18 @@ require 'faraday'
 require 'opentelemetry/sdk'
 require 'sinatra/base'
 require 'json'
+
 Bundler.require
-OpenTelemetry::SDK.configure do |c|
-   c.use_all
-end
 
 ENV['OTEL_TRACES_EXPORTER'] ||= 'otlp'
-ENV['OTEL_EXPORTER_OTLP_ENDPOINT'] ||= 'http://collector:4317'
+ENV['OTEL_EXPORTER_OTLP_ENDPOINT'] ||= 'http://0.0.0.0:4318'
+
+OpenTelemetry::SDK.configure do |c|
+   c.service_name = "lower"
+   c.logger.level = Logger::DEBUG
+   c.logger.debug("Using OTLP endpoint: #{ENV['OTEL_EXPORTER_OTLP_ENDPOINT']}")
+   c.use_all
+end
 
 
 # Rack middleware to extract span context, create child span, and add
@@ -35,6 +40,7 @@ class OpenTelemetryMiddleware
     )
 
     status, headers, response_body = 200, {}, ''
+    #OpenTelemetry.logger.debug("One more request #{env.inspect}")
 
     # Span name SHOULD be set to route:
     span_name = env['PATH_INFO']
@@ -66,15 +72,70 @@ class OpenTelemetryMiddleware
   end
 end
 
-class App < Sinatra::Base
-  set :bind, '0.0.0.0'
-  use OpenTelemetryMiddleware
-  CHARS = ('a'..'z').to_a
 
-  get '/' do
-    content_type :json
-    {char: CHARS.sample}.to_json
+OpenTelemetry::Exporter::OTLP::Exporter.class_eval do
+  def export(span_data, timeout: nil)
+    return FAILURE if @shutdown
+    OpenTelemetry.logger.debug("Sending #{span_data.size} (timeout: #{timeout}) elements in batch.")
+    send_bytes(encode(span_data), timeout: timeout)
+    OpenTelemetry.logger.debug("Done #{span_data.size} elements in batch.")
   end
+end
+module OpenTelemetry
+  module SDK
+    module Trace
+      module Export
+        class BatchSpanProcessor # rubocop:disable Metrics/ClassLength
+          def report_result(result_code, batch)
+            OpenTelemetry.logger.debug("#{result_code.zero? ? "Success" : "Fail"} to report #{batch.size} elements in batch.")
+    #        super
+          end
+        end
+      end
+    end
+  end
+end
 
-  run! if app_file == $0
+set :bind, '0.0.0.0'
+set :port, 5001
+
+use OpenTelemetryMiddleware
+CHARS = ('a'..'z').to_a
+
+get '/' do
+  content_type :json
+  c = CHARS.sample
+=begin
+  if ('q'..'z').include?(c)
+    tracer = OpenTelemetry.tracer_provider.tracer('sinatra', '1.0')
+    tracer.in_span("process_lower") do |span|
+      span.set_attribute('char', c)
+      #span.add_event("processing lower char", {'char': c})
+      sleep(rand / 100.0)
+      # 1/100 calls is extra slow
+      if rand > 0.99
+      #  span.add_event("extra work", {'char': c})
+        sleep(rand / 100)
+      end
+
+      # these chars are extra slow
+      if %w[z x r].include?(c)
+        tracer.in_span("extra_process_lower") do |span|
+          span.set_attribute('char', c)
+          sleep(rand / 10)
+        end
+      end
+
+      # these chars are extra slow too
+      if %w[z u t].include?(c)
+        tracer.in_span("extra_extra_process_lower") do |span|
+          span.set_attribute('char', c)
+          sleep(rand / 10)
+        end
+      end
+      sleep rand
+    end
+  end
+=end
+  {char: c}.to_json
 end

@@ -60,7 +60,7 @@ database. The database is not password protected.
 Use the psql client to connect to the Timescaledb instance via:
 
 ```bash
-psql -h localhost -p 5999 -d postgres -U postgres
+psql -h localhost -p 5999 -d otel_demo -U postgres
 ```
 ## Examples
 
