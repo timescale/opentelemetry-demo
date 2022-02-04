@@ -72,30 +72,6 @@ class OpenTelemetryMiddleware
   end
 end
 
-
-OpenTelemetry::Exporter::OTLP::Exporter.class_eval do
-  def export(span_data, timeout: nil)
-    return FAILURE if @shutdown
-    OpenTelemetry.logger.debug("Sending #{span_data.size} (timeout: #{timeout}) elements in batch.")
-    send_bytes(encode(span_data), timeout: timeout)
-    OpenTelemetry.logger.debug("Done #{span_data.size} elements in batch.")
-  end
-end
-module OpenTelemetry
-  module SDK
-    module Trace
-      module Export
-        class BatchSpanProcessor # rubocop:disable Metrics/ClassLength
-          def report_result(result_code, batch)
-            OpenTelemetry.logger.debug("#{result_code.zero? ? "Success" : "Fail"} to report #{batch.size} elements in batch.")
-    #        super
-          end
-        end
-      end
-    end
-  end
-end
-
 set :bind, '0.0.0.0'
 set :port, 5000
 
@@ -105,37 +81,5 @@ CHARS = ('a'..'z').to_a
 get '/' do
   content_type :json
   c = CHARS.sample
-=begin
-  if ('q'..'z').include?(c)
-    tracer = OpenTelemetry.tracer_provider.tracer('sinatra', '1.0')
-    tracer.in_span("process_lower") do |span|
-      span.set_attribute('char', c)
-      #span.add_event("processing lower char", {'char': c})
-      sleep(rand / 100.0)
-      # 1/100 calls is extra slow
-      if rand > 0.99
-      #  span.add_event("extra work", {'char': c})
-        sleep(rand / 100)
-      end
-
-      # these chars are extra slow
-      if %w[z x r].include?(c)
-        tracer.in_span("extra_process_lower") do |span|
-          span.set_attribute('char', c)
-          sleep(rand / 10)
-        end
-      end
-
-      # these chars are extra slow too
-      if %w[z u t].include?(c)
-        tracer.in_span("extra_extra_process_lower") do |span|
-          span.set_attribute('char', c)
-          sleep(rand / 10)
-        end
-      end
-      sleep rand
-    end
-  end
-=end
   {char: c}.to_json
 end
