@@ -19,6 +19,6 @@ service:
       level: "debug"
   pipelines:
     traces:
-      receivers: [otlp, http]
+      receivers: [otlp]
       processors: [batch]
       exporters: [otlp]

@@ -14,7 +14,7 @@ require 'json'
 Bundler.require
 
 ENV['OTEL_TRACES_EXPORTER'] ||= 'otlp'
-ENV['OTEL_EXPORTER_OTLP_ENDPOINT'] ||= 'http://0.0.0.0:4318'
+ENV['OTEL_EXPORTER_OTLP_ENDPOINT'] ||= 'http://collector:4318'
 
 OpenTelemetry::SDK.configure do |c|
    c.service_name = "lower"
@@ -97,7 +97,7 @@ module OpenTelemetry
 end
 
 set :bind, '0.0.0.0'
-set :port, 5001
+set :port, 5000
 
 use OpenTelemetryMiddleware
 CHARS = ('a'..'z').to_a
