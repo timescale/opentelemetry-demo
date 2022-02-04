@@ -19,6 +19,9 @@ a [generator](./generator) service which makes calls to the other services
 to compose a random password. Finally, there is a [load script](./load) which
 continuously calls the generator service in order to simulate user load.
 
+The **lower** service is a Ruby app using Sinatra framework while the other
+services use Python with Flask.
+
 ## The Observability Infrastructure
 
 All of the microservices forward their traces to an instance of the 
@@ -60,7 +63,7 @@ database. The database is not password protected.
 Use the psql client to connect to the Timescaledb instance via:
 
 ```bash
-psql -h localhost -p 5999 -d postgres -U postgres
+psql -h localhost -p 5999 -d otel_demo -U postgres
 ```
 ## Examples
 
