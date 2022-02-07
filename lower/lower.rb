@@ -15,6 +15,7 @@ require 'net/http'
 Bundler.require
 
 ENV['OTEL_TRACES_EXPORTER'] ||= 'otlp'
+ENV['OTEL_PROPAGATORS'] ||= 'tracecontext,baggage,b3'
 ENV['OTEL_EXPORTER_OTLP_ENDPOINT'] ||= 'http://collector:4318'
 
 OpenTelemetry::SDK.configure do |c|
@@ -88,14 +89,22 @@ def work time, span_name, c
   end
 end
 
-def get_digit
-  digit = Net::HTTP.get(URI("http://digit:5000"))
-  json = JSON.parse(digit)
-  json['char']
+def get_digit(c)
+  sinatra_tracer.in_span("get_digit", attributes: { "char" => c}, kind: :server) do |span|
+    begin
+      digit = Net::HTTP.get(URI("http://digit:5000"))
+      json = JSON.parse(digit)
+      json['char']
+    rescue Error => e
+      span.record_exception(e)
+      span.status = OpenTelemetry::Trace::Status.error
+    end
+  end
 end
 
 def prepare_char
   c = CHARS.sample
+  get_digit(c)
   case c
   when 'z', 'x', 'r'
     work(0.05, 'extra_process_lower',  c)
