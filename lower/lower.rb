@@ -25,12 +25,16 @@ OpenTelemetry::SDK.configure do |c|
 end
 
 
+def sinatra_tracer
+  OpenTelemetry.tracer_provider.tracer('sinatra', '1.0')
+end
+
 # Rack middleware to extract span context, create child span, and add
 # attributes/events to the span
 class OpenTelemetryMiddleware
   def initialize(app)
     @app = app
-    @tracer = OpenTelemetry.tracer_provider.tracer('sinatra', '1.0')
+    @tracer = sinatra_tracer
   end
 
   def call(env)
@@ -78,8 +82,8 @@ set :port, 5000
 
 use OpenTelemetryMiddleware
 CHARS = ('a'..'z').to_a
-def work time, description, c
-  @tracer.in_span(span_name, attributes: { "char" => c}, kind: :server) do |span|
+def work time, span_name, c
+  sinatra_tracer.in_span(span_name, attributes: { "char" => c}, kind: :server) do |span|
     sleep time
   end
 end
