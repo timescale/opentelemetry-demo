@@ -72,6 +72,8 @@ services:
       - collector
     ports:
       - 5054:5000/tcp
+    env_file:
+      - docker-compose.env
 
   lower:
     build:
@@ -81,6 +83,8 @@ services:
       - collector
     ports:
       - 5053:5000/tcp
+    env_file:
+      - docker-compose.env
 
   special:
     build:
@@ -90,6 +94,8 @@ services:
       - collector
     ports:
       - 5052:5000/tcp
+    env_file:
+      - docker-compose.env
   
   digit:
     build:
@@ -99,6 +105,8 @@ services:
       - collector
     ports:
       - 5051:5000/tcp
+    env_file:
+      - docker-compose.env
 
   generator:
     build:
@@ -111,6 +119,8 @@ services:
       - digit
     ports:
       - 5050:5000/tcp
+    env_file:
+      - docker-compose.env
 
   load:
     build:
