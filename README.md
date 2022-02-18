@@ -41,8 +41,12 @@ Jaeger and Grafana dashboards.
 
 The system runs in docker, is configured via the 
 [docker compose file](./docker-compose.yaml), and is operated with
-docker-compose. The [run.sh](./run.sh) script can be used to start
-up the system.
+docker-compose. Run the following command from the root of the repo
+to (re)start the system.
+
+```
+docker-compose up --remove-orphans --build --detach
+```
 
 Once running, the following links will let you explore the
 various components of the system:
@@ -54,6 +58,12 @@ various components of the system:
 - [upper service](http://localhost:5054/)
 - [Grafana](http://localhost:3000/)
 - [Jaeger](http://localhost:16686/search)
+
+When you are ready to shutdown the system, use the following command.
+
+```
+docker-compose down
+```
 
 ## Connecting to TimescaleDB
 

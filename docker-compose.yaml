@@ -72,8 +72,8 @@ services:
       - collector
     ports:
       - 5054:5000/tcp
-    env_file:
-      - docker-compose.env
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=collector:4317
 
   lower:
     build:
@@ -83,8 +83,8 @@ services:
       - collector
     ports:
       - 5053:5000/tcp
-    env_file:
-      - docker-compose.env
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://collector:4318
 
   special:
     build:
@@ -94,8 +94,8 @@ services:
       - collector
     ports:
       - 5052:5000/tcp
-    env_file:
-      - docker-compose.env
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=collector:4317
   
   digit:
     build:
@@ -105,8 +105,8 @@ services:
       - collector
     ports:
       - 5051:5000/tcp
-    env_file:
-      - docker-compose.env
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=collector:4317
 
   generator:
     build:
@@ -119,8 +119,8 @@ services:
       - digit
     ports:
       - 5050:5000/tcp
-    env_file:
-      - docker-compose.env
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=collector:4317
 
   load:
     build:

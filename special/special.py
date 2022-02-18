@@ -13,9 +13,9 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExport
 
 app = Flask(__name__)
 
-trace.set_tracer_provider(TracerProvider(resource=Resource.create({"service.name": "special"})))
-span_exporter = OTLPSpanExporter()
-trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(span_exporter))
+tracer_provider = TracerProvider(resource=Resource.create({"service.name": "special"}))
+tracer_provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
+trace.set_tracer_provider(tracer_provider)
 FlaskInstrumentor().instrument_app(app)
 tracer = trace.get_tracer(__name__)
 
