@@ -21,7 +21,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 6,
+  "id": 7,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -264,7 +264,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n    r.time,\n    'p' || lpad((p.p * 100.0)::int::text, 2, '0') as percentile,\n    approx_percentile(p.p, percentile_agg(r.duration_ms)) as duration\nFROM\n(\n    SELECT\n        time_bucket('1 minute', start_time) as time,\n        duration_ms\n    FROM ps_trace.span\n    WHERE $__timeFilter(start_time)\n    AND parent_span_id is null\n) r\nCROSS JOIN\n(\n    SELECT unnest(ARRAY[.01, .5, .75, .9, .95, .99]) as p\n) p\nGROUP BY r.time, p.p\nORDER BY r.time",
+          "rawSql": "SELECT\n    time_bucket('1 minute', start_time) as time,\n    ROUND(approx_percentile(0.99, percentile_agg(duration_ms))::numeric, 3) as duration_p99,\n    ROUND(approx_percentile(0.95, percentile_agg(duration_ms))::numeric, 3) as duration_p95,\n    ROUND(approx_percentile(0.90, percentile_agg(duration_ms))::numeric, 3) as duration_p90,\n    ROUND(approx_percentile(0.75, percentile_agg(duration_ms))::numeric, 3) as duration_p75,\n    ROUND(approx_percentile(0.50, percentile_agg(duration_ms))::numeric, 3) as duration_p50,\n    ROUND(approx_percentile(0.01, percentile_agg(duration_ms))::numeric, 3) as duration_p01\nFROM span\nWHERE\n    $__timeFilter(start_time)\n    AND parent_span_id is null\nGROUP BY time\nORDER BY time",
           "refId": "A",
           "select": [
             [
@@ -431,6 +431,6 @@
   "timezone": "",
   "title": "03 Request Durations",
   "uid": "GkrS6rJ7z",
-  "version": 3,
+  "version": 2,
   "weekStart": ""
 }

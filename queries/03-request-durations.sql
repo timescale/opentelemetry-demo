@@ -18,24 +18,19 @@ AND parent_span_id is null
 
 -- percentiles
 SELECT
-    r.time,
-    'p' || lpad((p.p * 100.0)::int::text, 2, '0') as percentile,
-    approx_percentile(p.p, percentile_agg(r.duration_ms)) as duration
-FROM
-(
-    SELECT
-        time_bucket('1 minute', start_time) as time,
-        duration_ms
-    FROM ps_trace.span
-    WHERE $__timeFilter(start_time)
+    time_bucket('1 minute', start_time) as time,
+    ROUND(approx_percentile(0.99, percentile_agg(duration_ms))::numeric, 3) as duration_p99,
+    ROUND(approx_percentile(0.95, percentile_agg(duration_ms))::numeric, 3) as duration_p95,
+    ROUND(approx_percentile(0.90, percentile_agg(duration_ms))::numeric, 3) as duration_p90,
+    ROUND(approx_percentile(0.75, percentile_agg(duration_ms))::numeric, 3) as duration_p75,
+    ROUND(approx_percentile(0.50, percentile_agg(duration_ms))::numeric, 3) as duration_p50,
+    ROUND(approx_percentile(0.01, percentile_agg(duration_ms))::numeric, 3) as duration_p01
+FROM span
+WHERE
+    $__timeFilter(start_time)
     AND parent_span_id is null
-) r
-CROSS JOIN
-(
-    SELECT unnest(ARRAY[.01, .5, .75, .9, .95, .99]) as p
-) p
-GROUP BY r.time, p.p
-ORDER BY r.time
+GROUP BY time
+ORDER BY time
 ;
 
 -- table
