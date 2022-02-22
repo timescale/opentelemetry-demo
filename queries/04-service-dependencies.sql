@@ -1,10 +1,11 @@
 
 -- nodes
 SELECT
-    value#>>'{}' as id,
-    value#>>'{}' as title
-FROM _ps_trace.tag
-WHERE key = 'service.name'
+    service_name as id,
+    service_name as title
+FROM ps_trace.span
+WHERE $__timeFilter(start_time)
+GROUP BY service_name
 ;
 
 -- edges

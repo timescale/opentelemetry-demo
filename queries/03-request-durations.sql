@@ -22,9 +22,7 @@ SELECT
     ROUND(approx_percentile(0.99, percentile_agg(duration_ms))::numeric, 3) as duration_p99,
     ROUND(approx_percentile(0.95, percentile_agg(duration_ms))::numeric, 3) as duration_p95,
     ROUND(approx_percentile(0.90, percentile_agg(duration_ms))::numeric, 3) as duration_p90,
-    ROUND(approx_percentile(0.75, percentile_agg(duration_ms))::numeric, 3) as duration_p75,
-    ROUND(approx_percentile(0.50, percentile_agg(duration_ms))::numeric, 3) as duration_p50,
-    ROUND(approx_percentile(0.01, percentile_agg(duration_ms))::numeric, 3) as duration_p01
+    ROUND(approx_percentile(0.50, percentile_agg(duration_ms))::numeric, 3) as duration_p50
 FROM span
 WHERE
     $__timeFilter(start_time)
