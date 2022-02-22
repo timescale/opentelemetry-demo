@@ -28,7 +28,7 @@ SELECT
     md5(service_name || '-' || span_name) as id,
     span_name as title,
     service_name as "subTitle",
-    count(*) as "mainStat"
+    count(distinct span_id) as "mainStat"
 FROM x
 GROUP BY service_name, span_name
 ;
