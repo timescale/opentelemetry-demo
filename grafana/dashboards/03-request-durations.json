@@ -142,6 +142,7 @@
       "id": 4,
       "options": {
         "bucketOffset": 0,
+        "bucketSize": 200,
         "legend": {
           "calcs": [],
           "displayMode": "list",
