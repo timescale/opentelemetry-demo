@@ -43,7 +43,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n    value#>>'{}' as id,\n    value#>>'{}' as title\nFROM _ps_trace.tag\nWHERE key = 'service.name'",
+          "rawSql": "SELECT \n   service_name as id,\n   service_name as title\nFROM ps_trace.span\nWHERE $__timeFilter(start_time)\nGROUP BY service_name",
           "refId": "A",
           "select": [
             [

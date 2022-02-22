@@ -142,6 +142,7 @@
       "id": 4,
       "options": {
         "bucketOffset": 0,
+        "bucketSize": 200,
         "legend": {
           "calcs": [],
           "displayMode": "list",
@@ -264,7 +265,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n    time_bucket('1 minute', start_time) as time,\n    ROUND(approx_percentile(0.99, percentile_agg(duration_ms))::numeric, 3) as duration_p99,\n    ROUND(approx_percentile(0.95, percentile_agg(duration_ms))::numeric, 3) as duration_p95,\n    ROUND(approx_percentile(0.90, percentile_agg(duration_ms))::numeric, 3) as duration_p90,\n    ROUND(approx_percentile(0.75, percentile_agg(duration_ms))::numeric, 3) as duration_p75,\n    ROUND(approx_percentile(0.50, percentile_agg(duration_ms))::numeric, 3) as duration_p50,\n    ROUND(approx_percentile(0.01, percentile_agg(duration_ms))::numeric, 3) as duration_p01\nFROM span\nWHERE\n    $__timeFilter(start_time)\n    AND parent_span_id is null\nGROUP BY time\nORDER BY time",
+          "rawSql": "SELECT\n    time_bucket('1 minute', start_time) as time,\n    ROUND(approx_percentile(0.99, percentile_agg(duration_ms))::numeric, 3) as duration_p99,\n    ROUND(approx_percentile(0.95, percentile_agg(duration_ms))::numeric, 3) as duration_p95,\n    ROUND(approx_percentile(0.90, percentile_agg(duration_ms))::numeric, 3) as duration_p90,\n    ROUND(approx_percentile(0.50, percentile_agg(duration_ms))::numeric, 3) as duration_p50\nFROM span\nWHERE\n    $__timeFilter(start_time)\n    AND parent_span_id is null\nGROUP BY time\nORDER BY time",
           "refId": "A",
           "select": [
             [
@@ -342,6 +343,16 @@
               {
                 "id": "custom.width",
                 "value": 282
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "View trace details",
+                    "url": "/explore?left=%5B%22${__from}%22,%22${__to}%22,%22Promscale-Tracing%22,%7B\"query\":\"${__value.raw}\"%7D%5D"
+                  }
+                ]
               }
             ]
           },
