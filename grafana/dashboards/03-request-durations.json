@@ -342,6 +342,16 @@
               {
                 "id": "custom.width",
                 "value": 282
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "View trace details",
+                    "url": "/explore?left=%5B%22${__from}%22,%22${__to}%22,%22Promscale-Tracing%22,%7B\"query\":\"${__value.raw}\"%7D%5D"
+                  }
+                ]
               }
             ]
           },
