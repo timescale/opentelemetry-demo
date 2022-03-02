@@ -35,7 +35,7 @@ ORDER BY time
 SELECT
   trace_id,
   start_time,
-  duration_ms,
+  duration_ms
 FROM ps_trace.span
 WHERE $__timeFilter(start_time)
 AND parent_span_id is null
