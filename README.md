@@ -67,10 +67,11 @@ docker-compose down
 
 ## Running the System in Kubernetes
 
-When you want to run the system in k8s you can use the following commands:
+When you want to run the system in k8s you can use the following commands (if you have certmanager installed skip that step):
 
 ```
-kubectl apply -k ./yaml/opentelemetry-operator
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.0/cert-manager.yaml
+kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/latest/download/opentelemetry-operator.yaml
 kubectl apply -k ./yaml
 ```
 

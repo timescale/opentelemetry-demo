@@ -3,4 +3,3 @@ kind: Kustomization
 resources:
 - collector.yaml
 - instrumentation.yaml
-- opentelemetry-operator.yaml
