@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: jaeger
+  name: jaeger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jaeger
+  template:
+    metadata:
+      labels:
+        app: jaeger
+    spec:
+      containers:
+      - env:
+        - name: GRPC_STORAGE_SERVER
+          value: promscale:9202
+        - name: SPAN_STORAGE_TYPE
+          value: grpc-plugin
+        image: jaegertracing/jaeger-query:1.30
+        name: jaeger
+        ports:
+        - containerPort: 16685
+        - containerPort: 16686
+        - containerPort: 16687
+      restartPolicy: Always

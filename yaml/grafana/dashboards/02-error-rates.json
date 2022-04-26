@@ -1,0 +1,508 @@
+{
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "target": {
+            "limit": 100,
+            "matchAny": false,
+            "tags": [],
+            "type": "dashboard"
+          },
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 11,
+    "iteration": 1642711372312,
+    "links": [],
+    "liveNow": false,
+    "panels": [
+      {
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              }
+            },
+            "mappings": []
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 11,
+          "w": 7,
+          "x": 0,
+          "y": 0
+        },
+        "id": 6,
+        "options": {
+          "displayLabels": [
+            "percent",
+            "name",
+            "value"
+          ],
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "values": [
+              "percent",
+              "value"
+            ]
+          },
+          "pieType": "pie",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "/^num_err$/",
+            "values": true
+          },
+          "tooltip": {
+            "mode": "multi"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "d7b6774ba1c1420aafd3b7ddfc9064c8"
+            },
+            "format": "table",
+            "group": [],
+            "metricColumn": "none",
+            "rawQuery": true,
+            "rawSql": "SELECT\n    service_name,\n    count(*) as num_err\nFROM ps_trace.span\nWHERE $__timeFilter(start_time)\nAND status_code = 'STATUS_CODE_ERROR'\nGROUP BY 1",
+            "refId": "A",
+            "select": [
+              [
+                {
+                  "params": [
+                    "span_duration_ms"
+                  ],
+                  "type": "column"
+                }
+              ]
+            ],
+            "table": "event",
+            "timeColumn": "\"time\"",
+            "timeColumnType": "timestamp",
+            "where": [
+              {
+                "name": "$__timeFilter",
+                "params": [],
+                "type": "macro"
+              }
+            ]
+          }
+        ],
+        "title": "Errors by Service",
+        "type": "piechart"
+      },
+      {
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "align": "auto",
+              "displayMode": "auto"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "err_rate"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "percentunit"
+                },
+                {
+                  "id": "displayName",
+                  "value": "Error Rate"
+                },
+                {
+                  "id": "decimals",
+                  "value": 3
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "num_err"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "Number of Errors"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "num_total"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "Total Executions"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "span_name"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "Operation"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "service_name"
+              },
+              "properties": [
+                {
+                  "id": "displayName",
+                  "value": "Service"
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 11,
+          "w": 16,
+          "x": 7,
+          "y": 0
+        },
+        "id": 2,
+        "options": {
+          "footer": {
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": true,
+          "sortBy": []
+        },
+        "pluginVersion": "8.3.3",
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "d7b6774ba1c1420aafd3b7ddfc9064c8"
+            },
+            "format": "table",
+            "group": [],
+            "metricColumn": "none",
+            "rawQuery": true,
+            "rawSql": "SELECT\n    x.service_name,\n    x.span_name,\n    x.num_err::numeric / x.num_total as err_rate\nFROM\n(\n    SELECT\n        service_name,\n        span_name,\n        count(*) filter (where status_code = 'STATUS_CODE_ERROR') as num_err,\n        count(*) as num_total\n    FROM ps_trace.span\n    WHERE $__timeFilter(start_time)\n    AND (service_name IN (${service:sqlstring}))\n    AND (span_name IN (${operation:sqlstring}))\n    GROUP BY 1, 2\n) x\nORDER BY err_rate desc",
+            "refId": "A",
+            "select": [
+              [
+                {
+                  "params": [
+                    "span_duration_ms"
+                  ],
+                  "type": "column"
+                }
+              ]
+            ],
+            "table": "event",
+            "timeColumn": "\"time\"",
+            "timeColumnType": "timestamp",
+            "where": [
+              {
+                "name": "$__timeFilter",
+                "params": [],
+                "type": "macro"
+              }
+            ]
+          }
+        ],
+        "title": "Error Rates",
+        "type": "table"
+      },
+      {
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "min": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "percentunit"
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "err_rate"
+              },
+              "properties": [
+                {
+                  "id": "unit",
+                  "value": "percentunit"
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 14,
+          "w": 23,
+          "x": 0,
+          "y": 11
+        },
+        "id": 8,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom"
+          },
+          "tooltip": {
+            "mode": "single"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "postgres",
+              "uid": "d7b6774ba1c1420aafd3b7ddfc9064c8"
+            },
+            "format": "time_series",
+            "group": [],
+            "metricColumn": "none",
+            "rawQuery": true,
+            "rawSql": "SELECT\n    x.time,\n    x.service_name,\n    x.span_name,\n    x.num_err::numeric / x.num_total as err_rate\nFROM\n(\n    SELECT\n        time_bucket('1 minute', start_time) as time,\n        service_name,\n        span_name,\n        count(*) filter (where status_code = 'STATUS_CODE_ERROR') as num_err,\n        count(*) as num_total\n    FROM ps_trace.span\n    WHERE $__timeFilter(start_time)\n    AND (service_name IN (${service:sqlstring}))\n    AND (span_name IN (${operation:sqlstring}))\n    GROUP BY 1, 2, 3\n) x\nORDER BY time",
+            "refId": "A",
+            "select": [
+              [
+                {
+                  "params": [
+                    "span_duration_ms"
+                  ],
+                  "type": "column"
+                }
+              ]
+            ],
+            "table": "event",
+            "timeColumn": "\"time\"",
+            "timeColumnType": "timestamp",
+            "where": [
+              {
+                "name": "$__timeFilter",
+                "params": [],
+                "type": "macro"
+              }
+            ]
+          }
+        ],
+        "title": "Error Rates by Minute",
+        "type": "timeseries"
+      }
+    ],
+    "schemaVersion": 34,
+    "style": "dark",
+    "tags": [],
+    "templating": {
+      "list": [
+        {
+          "current": {
+            "selected": true,
+            "text": [
+              "digit",
+              "generator",
+              "lower",
+              "special",
+              "upper"
+            ],
+            "value": [
+              "digit",
+              "generator",
+              "lower",
+              "special",
+              "upper"
+            ]
+          },
+          "definition": "SELECT value#>>'{}'\nFROM _ps_trace.tag\nWHERE key = 'service.name'",
+          "hide": 0,
+          "includeAll": false,
+          "label": "Service",
+          "multi": true,
+          "name": "service",
+          "options": [],
+          "query": "SELECT value#>>'{}'\nFROM _ps_trace.tag\nWHERE key = 'service.name'",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 1,
+          "type": "query"
+        },
+        {
+          "current": {
+            "selected": true,
+            "text": [
+              "/",
+              "HTTP GET",
+              "extra_extra_process_upper",
+              "extra_process_digit",
+              "extra_process_special",
+              "extra_process_upper",
+              "generator.digits",
+              "generator.generate",
+              "generator.lowers",
+              "generator.specials",
+              "generator.uppers",
+              "get_digit",
+              "process_digit",
+              "process_lower",
+              "process_special",
+              "process_upper",
+              "random_digit",
+              "random_lower",
+              "random_special",
+              "random_upper",
+              "render_digit",
+              "render_lower",
+              "render_special",
+              "render_upper"
+            ],
+            "value": [
+              "/",
+              "HTTP GET",
+              "extra_extra_process_upper",
+              "extra_process_digit",
+              "extra_process_special",
+              "extra_process_upper",
+              "generator.digits",
+              "generator.generate",
+              "generator.lowers",
+              "generator.specials",
+              "generator.uppers",
+              "get_digit",
+              "process_digit",
+              "process_lower",
+              "process_special",
+              "process_upper",
+              "random_digit",
+              "random_lower",
+              "random_special",
+              "random_upper",
+              "render_digit",
+              "render_lower",
+              "render_special",
+              "render_upper"
+            ]
+          },
+          "definition": "SELECT DISTINCT span_name\nFROM _ps_trace.operation\nWHERE service_name_id IN\n(\n    SELECT id\n    FROM _ps_trace.tag\n    WHERE key = 'service.name'\n    AND value#>>'{}' IN (${service:sqlstring})\n)",
+          "hide": 0,
+          "includeAll": false,
+          "label": "Operation",
+          "multi": true,
+          "name": "operation",
+          "options": [],
+          "query": "SELECT DISTINCT span_name\nFROM _ps_trace.operation\nWHERE service_name_id IN\n(\n    SELECT id\n    FROM _ps_trace.tag\n    WHERE key = 'service.name'\n    AND value#>>'{}' IN (${service:sqlstring})\n)",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 1,
+          "type": "query"
+        }
+      ]
+    },
+    "time": {
+      "from": "now-30m",
+      "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "02 Error Rates",
+    "uid": "CiE9l917z",
+    "version": 7,
+    "weekStart": ""
+  }

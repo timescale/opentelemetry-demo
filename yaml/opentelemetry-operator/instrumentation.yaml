@@ -1,0 +1,14 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: demo
+spec:
+  exporter:
+    endpoint: http://demo-collector:4318/v1/traces
+  propagators:
+  - tracecontext
+  - baggage
+# python:
+#   env:
+#   - name: OTEL_TRACES_EXPORTER
+#     value: otlp_proto_grpc

@@ -1,0 +1,15 @@
+# frozen_string_literal: true
+
+source "https://rubygems.org"
+
+gem "faraday", "~> 0.16.1"
+gem "opentelemetry-api"
+gem "opentelemetry-common"
+gem "opentelemetry-sdk"
+gem "sinatra", "~> 2.0"
+gem "pry", "~> 0.14.1"
+
+gem "opentelemetry-exporter-otlp", "~> 0.21.2"
+gem "opentelemetry-propagator-b3"
+gem "opentelemetry-instrumentation-sinatra"
+gem "opentelemetry-instrumentation-net_http"

@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: load
+  name: load
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: load
+  template:
+    metadata:
+      labels:
+        app: load
+      annotations:
+        instrumentation.opentelemetry.io/inject-python: "true"
+    spec:
+      containers:
+      - image: jamesgresql/opentelemetry-demo-u_load:0.3
+        name: load
+      restartPolicy: Always

@@ -1,0 +1,467 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 3,
+  "iteration": 1643312835417,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "description": "A.K.A. \"Who do I call?\"",
+      "gridPos": {
+        "h": 14,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 2,
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "d7b6774ba1c1420aafd3b7ddfc9064c8"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "WITH RECURSIVE x AS\n(\n    SELECT\n        trace_id,\n        span_id,\n        parent_span_id,\n        service_name,\n        span_name\n    FROM ps_trace.span\n    WHERE $__timeFilter(start_time)\n    AND service_name = '${service}'\n    AND span_name = '${operation}'\n    UNION ALL\n    SELECT\n        s.trace_id,\n        s.span_id,\n        s.parent_span_id,\n        s.service_name,\n        s.span_name\n    FROM x\n    INNER JOIN ps_trace.span s\n    ON (x.trace_id = s.trace_id\n    AND x.span_id = s.parent_span_id)\n)\nSELECT\n    md5(service_name || '-' || span_name) as id,\n    span_name as title,\n    service_name as \"subTitle\",\n    count(*) as \"mainStat\"\nFROM x\nGROUP BY service_name, span_name",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "span_duration_ms"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "event",
+          "timeColumn": "\"time\"",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "d7b6774ba1c1420aafd3b7ddfc9064c8"
+          },
+          "format": "table",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "WITH RECURSIVE x AS\n(\n    SELECT\n        trace_id,\n        span_id,\n        parent_span_id,\n        service_name,\n        span_name,\n        null::text as id,\n        null::text as source,\n        null::text as target\n    FROM ps_trace.span\n    WHERE $__timeFilter(start_time)\n    AND service_name = '${service}'\n    AND span_name = '${operation}'\n    UNION ALL\n    SELECT\n        s.trace_id,\n        s.span_id,\n        s.parent_span_id,\n        s.service_name,\n        s.span_name,\n        md5(s.service_name || '-' || s.span_name || '-' || x.service_name || '-' || x.span_name) as id,\n        md5(x.service_name || '-' || x.span_name) as source,\n        md5(s.service_name || '-' || s.span_name) as target\n    FROM x\n    INNER JOIN ps_trace.span s\n    ON (x.trace_id = s.trace_id\n    AND x.span_id = s.parent_span_id)\n)\nSELECT DISTINCT\n    x.id,\n    x.source,\n    x.target \nFROM x\nWHERE id is not null",
+          "refId": "B",
+          "select": [
+            [
+              {
+                "params": [
+                  "span_duration_ms"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "event",
+          "timeColumn": "\"time\"",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Downstream Spans",
+      "transformations": [],
+      "type": "nodeGraph"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": [],
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 17,
+        "w": 10,
+        "x": 0,
+        "y": 14
+      },
+      "id": 4,
+      "options": {
+        "displayLabels": [
+          "percent"
+        ],
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "values": [
+            "percent",
+            "value"
+          ]
+        },
+        "pieType": "donut",
+        "reduceOptions": {
+          "calcs": [
+            "allValues"
+          ],
+          "fields": "/^total_exec_time$/",
+          "limit": 1000,
+          "values": true
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "d7b6774ba1c1420aafd3b7ddfc9064c8"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "WITH RECURSIVE x AS\n(\n    SELECT\n        s.trace_id,\n        s.span_id,\n        s.parent_span_id,\n        s.service_name,\n        s.span_name,\n        s.duration_ms - coalesce(\n        (\n            SELECT sum(z.duration_ms)\n            FROM ps_trace.span z\n            WHERE s.trace_id = z.trace_id\n            AND s.span_id = z.parent_span_id\n        ), 0.0) as duration_ms\n    FROM ps_trace.span s\n    WHERE $__timeFilter(s.start_time)\n    AND s.service_name = '${service}'\n    AND s.span_name = '${operation}'\n    UNION ALL\n    SELECT\n        s.trace_id,\n        s.span_id,\n        s.parent_span_id,\n        s.service_name,\n        s.span_name,\n        s.duration_ms - coalesce(\n        (\n            SELECT sum(z.duration_ms)\n            FROM ps_trace.span z\n            WHERE s.trace_id = z.trace_id\n            AND s.span_id = z.parent_span_id\n        ), 0.0) as duration_ms\n    FROM x\n    INNER JOIN ps_trace.span s\n    ON (x.trace_id = s.trace_id\n    AND x.span_id = s.parent_span_id)\n)\nSELECT\n    service_name,\n    span_name,\n    sum(duration_ms) as total_exec_time\nFROM x\nGROUP BY 1, 2\nORDER BY 3 DESC",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "span_duration_ms"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "event",
+          "timeColumn": "\"time\"",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Total Execution Time by Operation",
+      "type": "piechart"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Total Execution Time",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 14,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 17,
+        "w": 14,
+        "x": 10,
+        "y": 14
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull",
+            "mean"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "sortBy": "Mean",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "d7b6774ba1c1420aafd3b7ddfc9064c8"
+          },
+          "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "WITH RECURSIVE x AS\n(\n    SELECT\n        time_bucket('15 seconds', s.start_time) as time,\n        s.trace_id,\n        s.span_id,\n        s.parent_span_id,\n        s.service_name,\n        s.span_name,\n        s.duration_ms - coalesce(\n        (\n            SELECT sum(z.duration_ms)\n            FROM ps_trace.span z\n            WHERE s.trace_id = z.trace_id\n            AND s.span_id = z.parent_span_id\n        ), 0.0) as duration_ms\n    FROM ps_trace.span s\n    WHERE $__timeFilter(s.start_time)\n    AND s.service_name = '${service}'\n    AND s.span_name = '${operation}'\n    UNION ALL\n    SELECT\n        time_bucket('15 seconds', s.start_time) as time,\n        s.trace_id,\n        s.span_id,\n        s.parent_span_id,\n        s.service_name,\n        s.span_name,\n        s.duration_ms - coalesce(\n        (\n            SELECT sum(z.duration_ms)\n            FROM ps_trace.span z\n            WHERE s.trace_id = z.trace_id\n            AND s.span_id = z.parent_span_id\n        ), 0.0) as duration_ms\n    FROM x\n    INNER JOIN ps_trace.span s\n    ON (x.trace_id = s.trace_id\n    AND x.span_id = s.parent_span_id)\n)\nSELECT\n    time,\n    service_name || ' ' || span_name as series,\n    sum(duration_ms) as exec_ms\nFROM x\nGROUP BY 1, 2\nORDER BY 1",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "span_duration_ms"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "event",
+          "timeColumn": "\"time\"",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Total Execution Time by Operation Over Time",
+      "type": "timeseries"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto"
+          },
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "num_errors"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "none"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 24,
+        "x": 0,
+        "y": 31
+      },
+      "id": 8,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "8.3.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "d7b6774ba1c1420aafd3b7ddfc9064c8"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "WITH RECURSIVE x AS\n(\n    SELECT\n        s.trace_id,\n        s.span_id,\n        s.parent_span_id,\n        s.service_name,\n        s.span_name,\n        s.duration_ms - coalesce(\n        (\n            SELECT sum(z.duration_ms)\n            FROM ps_trace.span z\n            WHERE s.trace_id = z.trace_id\n            AND s.span_id = z.parent_span_id\n        ), 0.0) as duration_ms\n    FROM ps_trace.span s\n    WHERE $__timeFilter(s.start_time)\n    AND s.service_name = '${service}'\n    AND s.span_name = '${operation}'\n    UNION ALL\n    SELECT\n        s.trace_id,\n        s.span_id,\n        s.parent_span_id,\n        s.service_name,\n        s.span_name,\n        s.duration_ms - coalesce(\n        (\n            SELECT sum(z.duration_ms)\n            FROM ps_trace.span z\n            WHERE s.trace_id = z.trace_id\n            AND s.span_id = z.parent_span_id\n        ), 0.0) as duration_ms\n    FROM x\n    INNER JOIN ps_trace.span s\n    ON (x.trace_id = s.trace_id\n    AND x.span_id = s.parent_span_id)\n)\nSELECT\n    service_name,\n    span_name as operation,\n    sum(duration_ms) as total_exec_time,\n    approx_percentile(0.5, percentile_agg(duration_ms)) as p50,\n    approx_percentile(0.95, percentile_agg(duration_ms)) as p95,\n    approx_percentile(0.99, percentile_agg(duration_ms)) as p99\nFROM x\nGROUP BY 1, 2\nORDER BY 3 DESC",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "span_duration_ms"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "event",
+          "timeColumn": "\"time\"",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Operation Execution Times",
+      "type": "table"
+    }
+  ],
+  "schemaVersion": 34,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "allValue": "ALL",
+        "current": {
+          "selected": false,
+          "text": "generator",
+          "value": "generator"
+        },
+        "definition": "SELECT value#>>'{}'\nFROM _ps_trace.tag\nWHERE key = 'service.name'\n",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Service",
+        "multi": false,
+        "name": "service",
+        "options": [],
+        "query": "SELECT value#>>'{}'\nFROM _ps_trace.tag\nWHERE key = 'service.name'\n",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": "ALL",
+        "current": {
+          "selected": false,
+          "text": "/",
+          "value": "/"
+        },
+        "definition": "SELECT DISTINCT span_name\nFROM _ps_trace.operation\nWHERE service_name_id IN\n(\n    SELECT id\n    FROM _ps_trace.tag\n    WHERE key = 'service.name'\n    AND value#>>'{}' IN  (${service:sqlstring})\n)",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Operation",
+        "multi": false,
+        "name": "operation",
+        "options": [],
+        "query": "SELECT DISTINCT span_name\nFROM _ps_trace.operation\nWHERE service_name_id IN\n(\n    SELECT id\n    FROM _ps_trace.tag\n    WHERE key = 'service.name'\n    AND value#>>'{}' IN  (${service:sqlstring})\n)",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "06 Downstream Spans",
+  "uid": "SdzI3eJnk",
+  "version": 3,
+  "weekStart": ""
+}
