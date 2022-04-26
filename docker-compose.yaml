@@ -4,7 +4,7 @@ services:
 
   timescaledb:
     build:
-      context: ./timescaledb
+      context: ./instrumented/timescaledb
     volumes:
       - timescaledb-data:/var/lib/postgresql/data
     ports:
@@ -44,7 +44,7 @@ services:
 
   grafana:
     build:
-      context: ./grafana
+      context: ./instrumented/grafana
     volumes:
       - grafana-data:/var/lib/grafana
     ports:
@@ -56,7 +56,7 @@ services:
 
   collector:
     build:
-      context: ./collector
+      context: ./instrumented/collector
     ports:
       - 4317:4317/tcp
       - 4318:4318/tcp
@@ -66,7 +66,7 @@ services:
 
   upper:
     build:
-      context: ./upper
+      context: ./instrumented/upper
     restart: on-failure
     depends_on:
       - collector
@@ -77,7 +77,7 @@ services:
 
   lower:
     build:
-      context: ./lower
+      context: ./instrumented/lower
     restart: on-failure
     depends_on:
       - collector
@@ -88,7 +88,7 @@ services:
 
   special:
     build:
-      context: ./special
+      context: ./instrumented/special
     restart: on-failure
     depends_on:
       - collector
@@ -99,7 +99,7 @@ services:
   
   digit:
     build:
-      context: ./digit
+      context: ./instrumented/digit
     restart: on-failure
     depends_on:
       - collector
@@ -110,7 +110,7 @@ services:
 
   generator:
     build:
-      context: ./generator
+      context: ./instrumented/generator
     restart: on-failure
     depends_on:
       - upper
@@ -124,7 +124,7 @@ services:
 
   load:
     build:
-      context: ./load
+      context: ./instrumented/load
     restart: on-failure
     depends_on:
       - generator

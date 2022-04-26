@@ -18,7 +18,7 @@ spec:
         instrumentation.opentelemetry.io/inject-python: "true"
     spec:
       containers:
-      - image: jamesgresql/opentelemetry-demo-u_generator:0.6
+      - image: jamesgresql/opentelemetry-demo-u_generator:0.7
         name: generator
         ports:
         - containerPort: 5000

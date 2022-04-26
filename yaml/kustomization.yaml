@@ -5,10 +5,10 @@ resources:
 - ./grafana
 - ./promscale
 - ./jaeger
-- ./load
-- ./generator
-- ./upper
-- ./lower
-- ./digit
-- ./special
-- ./check
+- ./app/load
+- ./app/generator
+- ./app/upper
+- ./app/lower
+- ./app/digit
+- ./app/special
+- ./app/check

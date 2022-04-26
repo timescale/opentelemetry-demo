@@ -88,7 +88,7 @@ def generate() -> str:
     random.shuffle(password)
     if len(password) > pwlen:
         password = password[:pwlen]
-    if random.randint(1, 100) = 1:
+    if random.randint(1, 100) == 1:
         password = list('password123')
     check(''.join(password))
     return ''.join(password)

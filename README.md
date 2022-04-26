@@ -37,9 +37,9 @@ and the TimescaleDB database. In this way, you can use SQL to query
 the traces directly in the database, and visualize tracing data in
 Jaeger and Grafana dashboards.
 
-## Running the System
+## Running the System in Docker
 
-The system runs in docker, is configured via the 
+When the system runs in docker it is configured via the 
 [docker compose file](./docker-compose.yaml), and is operated with
 docker-compose. Run the following command from the root of the repo
 to (re)start the system.
@@ -64,6 +64,24 @@ When you are ready to shutdown the system, use the following command.
 ```
 docker-compose down
 ```
+
+## Running the System in Kubernetes
+
+When you want to run the system in k8s you can use the following commands:
+
+```
+kubectl apply -k ./yaml/opentelemetry-operator
+kubectl apply -k ./yaml
+```
+
+You should wait for the OpenTelemetry Operator pod to come up before you run the second
+command. 
+
+You should see data flowing into Grafana automatically.
+
+To access individual services as per the Docker instructions below you will need to run
+`./yaml/port-forward.sh`
+
 
 ## Connecting to TimescaleDB
 
