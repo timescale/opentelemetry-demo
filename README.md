@@ -80,7 +80,9 @@ command.
 You should see data flowing into Grafana automatically.
 
 To access individual services as per the Docker instructions below you will need to run
-`./yaml/port-forward.sh`
+```
+sh ./yaml/port-forward.sh
+```
 
 
 ## Connecting to TimescaleDB
