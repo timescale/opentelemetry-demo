@@ -11,16 +11,20 @@ A password generator service is instrumented with
 [OpenTelemetry tracing](https://opentelemetry-python.readthedocs.io/en/stable/). 
 This is an absurd service and should not be taken as a shining example
 of architecture nor coding. It exists as a playground example to generate
-traces. The [lower service](./lower) generates random lowercase letters. The 
-[upper service](./upper) service generates random uppercase letters. The 
-[digit service](./digit) generates random digits, and the 
-[special service](./special) generates random special characters. There is 
-a [generator](./generator) service which makes calls to the other services
-to compose a random password. Finally, there is a [load script](./load) which
+traces. The [lower service](./instrumented/lower) generates random lowercase letters. The 
+[upper service](./instrumented/upper) service generates random uppercase letters. The 
+[digit service](./instrumented/digit) generates random digits, and the 
+[special service](./instrumented/special) generates random special characters. There is 
+a [generator](./instrumented/generator) service which makes calls to the other services
+to compose a random password. Finally, there is a [load script](./instrumented/load) which
 continuously calls the generator service in order to simulate user load.
 
 The **lower** service is a Ruby app using Sinatra framework while the other
 services use Python with Flask.
+
+There are two versions of the services. Those under the [instrumented](./instrumented/) 
+directory have explicit instrumentation for tracing, whereas the versions under the 
+[uninstrumented](./uninstrumented/) directory solely use auto-instrumentation.
 
 ## The Observability Infrastructure
 
