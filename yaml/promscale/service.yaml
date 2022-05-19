@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: promscale
+  name: promscale
+spec:
+  ports:
+  - name: "9201"
+    port: 9201
+    targetPort: 9201
+  - name: "9202"
+    port: 9202
+    targetPort: 9202
+  selector:
+    app: promscale

@@ -1,0 +1,30 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: demo
+spec:
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          http:
+    processors:
+      batch:
+
+    exporters:
+      logging:
+      otlp:
+        endpoint: "http://promscale:9202"
+        compression: none
+        tls:
+          insecure: true
+
+    service:
+      telemetry:
+        logs:
+          level: "debug"
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: []
+          exporters: [otlp]

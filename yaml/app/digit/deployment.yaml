@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: digit
+    demo: "true"
+  name: digit
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: digit
+  template:
+    metadata:
+      labels:
+        app: digit
+      annotations:
+        instrumentation.opentelemetry.io/inject-python: "true"
+    spec:
+      containers:
+      - image: jamesgresql/opentelemetry-demo-u_digit:0.2
+        name: digit
+        ports:
+        - containerPort: 5000
+      restartPolicy: Always

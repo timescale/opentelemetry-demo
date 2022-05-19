@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: check
+    demo: "true"
+  name: check
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: check
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: check
+      annotations:
+        instrumentation.opentelemetry.io/inject-python: "true"
+    spec:
+      containers:
+      - image: jamesgresql/opentelemetry-demo-u_check:0.14
+        name: lower
+        ports:
+        - containerPort: 5000
+      restartPolicy: Always

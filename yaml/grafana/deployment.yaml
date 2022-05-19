@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+  labels:
+    app: grafana
+  name: grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      securityContext:
+        fsGroup: 472
+      containers:
+      - image: grafana/grafana-oss:8.3.3
+        name: grafana
+        ports:
+        - containerPort: 3000
+        volumeMounts:
+        - mountPath: /var/lib/grafana
+          name: grafana-data
+        - mountPath: /etc/grafana/provisioning/datasources
+          name: grafana-datasources-config
+        - mountPath: /etc/grafana/provisioning/dashboards
+          name: grafana-dashboards-config
+        - mountPath: /etc/grafana/provisioning/dashboards/demo
+          name: grafana-dashboards-data
+      restartPolicy: Always
+      volumes:
+      - name: grafana-data
+        persistentVolumeClaim:
+          claimName: grafana-data
+      - name: grafana-datasources-config
+        configMap:
+          name: grafana-datasources-config
+      - name: grafana-dashboards-config
+        configMap:
+          name: grafana-dashboards-config
+      - name: grafana-dashboards-data
+        configMap:
+          name: grafana-dashboards-data

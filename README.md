@@ -11,16 +11,20 @@ A password generator service is instrumented with
 [OpenTelemetry tracing](https://opentelemetry-python.readthedocs.io/en/stable/). 
 This is an absurd service and should not be taken as a shining example
 of architecture nor coding. It exists as a playground example to generate
-traces. The [lower service](./lower) generates random lowercase letters. The 
-[upper service](./upper) service generates random uppercase letters. The 
-[digit service](./digit) generates random digits, and the 
-[special service](./special) generates random special characters. There is 
-a [generator](./generator) service which makes calls to the other services
-to compose a random password. Finally, there is a [load script](./load) which
+traces. The [lower service](./instrumented/lower) generates random lowercase letters. The 
+[upper service](./instrumented/upper) service generates random uppercase letters. The 
+[digit service](./instrumented/digit) generates random digits, and the 
+[special service](./instrumented/special) generates random special characters. There is 
+a [generator](./instrumented/generator) service which makes calls to the other services
+to compose a random password. Finally, there is a [load script](./instrumented/load) which
 continuously calls the generator service in order to simulate user load.
 
 The **lower** service is a Ruby app using Sinatra framework while the other
 services use Python with Flask.
+
+There are two versions of the services. Those under the [instrumented](./instrumented/) 
+directory have explicit instrumentation for tracing, whereas the versions under the 
+[uninstrumented](./uninstrumented/) directory solely use auto-instrumentation.
 
 ## The Observability Infrastructure
 
@@ -37,9 +41,9 @@ and the TimescaleDB database. In this way, you can use SQL to query
 the traces directly in the database, and visualize tracing data in
 Jaeger and Grafana dashboards.
 
-## Running the System
+## Running the System in Docker
 
-The system runs in docker, is configured via the 
+When the system runs in docker it is configured via the 
 [docker compose file](./docker-compose.yaml), and is operated with
 docker-compose. Run the following command from the root of the repo
 to (re)start the system.
@@ -64,6 +68,27 @@ When you are ready to shutdown the system, use the following command.
 ```
 docker-compose down
 ```
+
+## Running the System in Kubernetes
+
+When you want to run the system in k8s you can use the following commands (if you have certmanager installed skip that step):
+
+```
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.0/cert-manager.yaml
+kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/latest/download/opentelemetry-operator.yaml
+kubectl apply -k ./yaml
+```
+
+You should wait for the OpenTelemetry Operator pod to come up before you run the second
+command. 
+
+You should see data flowing into Grafana automatically.
+
+To access individual services as per the Docker instructions below you will need to run
+```
+sh ./yaml/port-forward.sh
+```
+
 
 ## Connecting to TimescaleDB
 

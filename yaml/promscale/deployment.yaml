@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: promscale
+  name: promscale
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: promscale
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: promscale
+    spec:
+      containers:
+      - env:
+        - name: PROMSCALE_DB_CONNECT_RETRIES
+          value: "10"
+        - name: PROMSCALE_DB_URI
+          value: postgres://postgres:password@timescaledb:5432/otel_demo?sslmode=allow
+        - name: PROMSCALE_ENABLE_FEATURE
+          value: tracing
+        - name: PROMSCALE_OTLP_GRPC_SERVER_LISTEN_ADDRESS
+          value: 0.0.0.0:9202
+        - name: PROMSCALE_WEB_TELEMETRY_PATH
+          value: /metrics-text
+        image: timescale/promscale:0.8.0
+        name: promscale
+        ports:
+        - containerPort: 9201
+        - containerPort: 9202
+      restartPolicy: Always

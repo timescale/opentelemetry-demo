@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: timescaledb
+  name: timescaledb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: timescaledb
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: timescaledb
+    spec:
+      containers:
+      - env:
+        - name: POSTGRES_DB
+          value: otel_demo
+        - name: POSTGRES_HOST_AUTH_METHOD
+          value: trust
+        - name: POSTGRES_USER
+          value: postgres
+        image: timescale/timescaledb-ha:pg14-latest
+        name: timescaledb
+        ports:
+        - containerPort: 5432
+        resources: {}
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: timescaledb-data
+        - mountPath: /docker-entrypoint-initdb.d/
+          name: timescaledb-bootstrap
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - name: timescaledb-data
+        persistentVolumeClaim:
+          claimName: timescaledb-data
+      - name: timescaledb-bootstrap
+        configMap:
+          name: timescaledb-bootstrap

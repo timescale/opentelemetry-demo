@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- deployment.yaml
+- persistentvolumeclaim.yaml
+- service.yaml
+
+configMapGenerator:
+- name: grafana-datasources-config
+  files:
+  - ./datasources.yaml
+- name: grafana-dashboards-config
+  files:
+  - ./dashboards.yaml
+- name: grafana-dashboards-data
+  files:
+  - ./dashboards/01-request-rate.json
+  - ./dashboards/02-error-rates.json
+  - ./dashboards/03-request-durations.json
+  - ./dashboards/04-service-dependencies.json
+  - ./dashboards/05-upstream-spans.json
+  - ./dashboards/06-downstream-spans.json

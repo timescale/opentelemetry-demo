@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: generator
+    demo: "true"
+  name: generator
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: generator
+  template:
+    metadata:
+      labels:
+        app: generator
+      annotations:
+        instrumentation.opentelemetry.io/inject-python: "true"
+    spec:
+      containers:
+      - image: jamesgresql/opentelemetry-demo-u_generator:0.7
+        name: generator
+        ports:
+        - containerPort: 5000
+      restartPolicy: Always
