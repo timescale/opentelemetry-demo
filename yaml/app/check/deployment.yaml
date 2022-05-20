@@ -19,8 +19,31 @@ spec:
         instrumentation.opentelemetry.io/inject-python: "true"
     spec:
       containers:
-      - image: jamesgresql/opentelemetry-demo-u_check:0.14
+      - image: jamesgresql/opentelemetry-demo-u_check:0.21
         name: lower
         ports:
         - containerPort: 5000
+        env:
+        - name: PGUSER
+          valueFrom:
+            secretKeyRef:
+              name: tobs-promscale
+              key: PROMSCALE_DB_USER
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: tobs-promscale
+              key: PROMSCALE_DB_PASSWORD
+        - name: PGHOST
+          valueFrom:
+            secretKeyRef:
+              name: tobs-promscale
+              key: PROMSCALE_DB_HOST
+        - name: PGDATABASE
+          valueFrom:
+            secretKeyRef:
+              name: tobs-promscale
+              key: PROMSCALE_DB_NAME
       restartPolicy: Always
+
+
