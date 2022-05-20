@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: tobs-timescaledb
+  name: timescaledb
+spec:
+  ports:
+  - name: app
+    port: 5432
+    targetPort: 5432
+  selector:
+    app: tobs-timescaledb

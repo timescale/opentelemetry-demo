@@ -8,3 +8,4 @@ resources:
 - ./special
 - ./upper
 - ./check
+- ./database.yaml
