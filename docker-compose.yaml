@@ -4,7 +4,7 @@ services:
 
   timescaledb:
     build:
-      context: ./instrumented/timescaledb
+      context: ./timescaledb
     volumes:
       - timescaledb-data:/var/lib/postgresql/data
     ports:
@@ -44,7 +44,7 @@ services:
 
   grafana:
     build:
-      context: ./instrumented/grafana
+      context: ./grafana
     volumes:
       - grafana-data:/var/lib/grafana
     ports:
@@ -56,7 +56,7 @@ services:
 
   collector:
     build:
-      context: ./instrumented/collector
+      context: ./collector
     ports:
       - 4317:4317/tcp
       - 4318:4318/tcp
