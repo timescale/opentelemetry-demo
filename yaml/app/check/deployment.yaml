@@ -19,7 +19,7 @@ spec:
         instrumentation.opentelemetry.io/inject-python: "true"
     spec:
       containers:
-      - image: jamesgresql/opentelemetry-demo-u_check:0.21
+      - image: jamesgresql/opentelemetry-demo-u_check:0.22
         name: lower
         ports:
         - containerPort: 5000
