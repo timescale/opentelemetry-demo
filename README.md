@@ -5,6 +5,11 @@
 This repo contains a environment for demonstrating OpenTelemetry tracing
 support in [Promscale](https://www.timescale.com/promscale).
 
+## Workshop
+
+This repo is used to deliver workshops on OpenTelemetry Traces and SQL. If you are here
+to explore the workshop, head to this [page](./workshop.md).
+
 ## The Password Generator Service
 
 A password generator service is instrumented with 
@@ -108,34 +113,34 @@ _Note: the default Grafana login credentials are user "admin" and password "admi
 
 [Grafana Dashboard](http://localhost:3000/d/QoZDH91nk/01-request-rate?orgId=1)
 
-[Queries](queries/01-request-rates.sql)
+[Queries](instrumented/queries/01-request-rates.sql)
 
 ### Error Rates
 
 [Grafana Dashboard](http://localhost:3000/d/CiE9l917z/02-error-rates?orgId=1)
 
-[Queries](queries/02-error-rates.sql)
+[Queries](instrumented/queries/02-error-rates.sql)
 
 ### Request Durations
 
 [Grafana Dashboard](http://localhost:3000/d/GkrS6rJ7z/03-request-durations?orgId=1)
 
-[Queries](queries/03-request-durations.sql)
+[Queries](instrumented/queries/03-request-durations.sql)
 
 ### Service Dependencies
 
 [Grafana Dashboard](http://localhost:3000/d/scyq99J7k/04-service-dependencies?orgId=1)
 
-[Queries](queries/04-service-dependencies.sql)
+[Queries](instrumented/queries/04-service-dependencies.sql)
 
 ### Upstream Spans
 
 [Grafana Dashboard](http://localhost:3000/d/lyIow61nz/05-upstream-spans?orgId=1)
 
-[Queries](queries/05-upstream-spans.sql)
+[Queries](instrumented/queries/05-upstream-spans.sql)
 
 ### Downstream Spans
 
 [Grafana Dashboard](http://localhost:3000/d/SdzI3eJnk/06-downstream-spans?orgId=1)
 
-[Queries](queries/06-downstream-spans.sql)
+[Queries](instrumented/queries/06-downstream-spans.sql)
