@@ -32,7 +32,7 @@ def random_digit() -> str:
         work(0.0003, 0.0001)
 
         # slowness varies with the minute of the hour
-        time.sleep(sin(time.localtime().tm_min) + 1.0)
+        time.sleep((sin(time.localtime().tm_min) + 1.0) / 5.0)
 
         c = random.choice(string.digits)
         span.set_attribute('char', c)
