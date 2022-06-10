@@ -300,49 +300,256 @@ ORDER BY time, total_exec_ms
 
 ### Dashboard 2
 
-#### Service Map
+#### Upstream Spans Table
+
+![Upstream Spans Table](/assets/upstream-spans-table.png)
 
 ```sql
-SELECT DISTINCT 
-    s.service_name as id,
-    s.service_name as title
-FROM ps_trace.span s
-WHERE $__timeFilter(s.start_time)
-```
-
-```sql
-SELECT
-    src.service_name || '|' || tgt.service_name as id,
-    src.service_name as source,
-    src.service_name as target
-FROM ps_trace.span src
-INNER JOIN ps_trace.span tgt
-ON (src.trace_id = tgt.trace_id
-AND src.span_id = tgt.parent_span_id
-AND src.service_name != tgt.service_name
+WITH RECURSIVE x AS
+(
+    SELECT
+        s.trace_id,
+        s.span_id,
+        s.parent_span_id,
+        s.service_name,
+        s.span_name,
+        s.duration_ms,
+        0::int as dist
+    FROM ps_trace.span s
+    WHERE $__timeFilter(s.start_time)
+    AND s.service_name = '$service'
+    AND s.span_name = '$span_name'
+    UNION ALL
+    SELECT
+        p.trace_id,
+        p.span_id,
+        p.parent_span_id,
+        p.service_name,
+        p.span_name,
+        p.duration_ms,
+        x.dist + 1 as dist
+    FROM ps_trace.span p
+    INNER JOIN x 
+    ON (p.trace_id = x.trace_id
+    AND p.span_id = x.parent_span_id)
+    WHERE $__timeFilter(p.start_time)
 )
-WHERE $__timeFilter(src.start_time)
-AND $__timeFilter(tgt.start_time)
-GROUP BY src.service_name, tgt.service_name
+SELECT
+    x.service_name,
+    x.span_name,
+    x.dist,
+    approx_percentile(0.95, percentile_agg(x.duration_ms)) as duration_p95
+FROM x
+WHERE x.dist != 0
+GROUP BY x.service_name, x.span_name, x.dist
+ORDER BY x.dist
 ```
 
-#### Service Dependencies
+#### Downstream Spans Table
+
+![Downstream Spans Table](/assets/downstream-spans-table.png)
 
 ```sql
+WITH RECURSIVE x AS
+(
+    SELECT
+        s.trace_id,
+        s.span_id,
+        s.parent_span_id,
+        s.service_name,
+        s.span_name,
+        s.duration_ms,
+        0::int as dist
+    FROM ps_trace.span s
+    WHERE $__timeFilter(s.start_time)
+    AND s.service_name = '$service'
+    AND s.span_name = '$span_name'
+    UNION ALL
+    SELECT
+        k.trace_id,
+        k.span_id,
+        k.parent_span_id,
+        k.service_name,
+        k.span_name,
+        k.duration_ms,
+        x.dist + 1 as dist
+    FROM ps_trace.span k
+    INNER JOIN x 
+    ON (k.trace_id = x.trace_id
+    AND k.parent_span_id = x.span_id)
+    WHERE $__timeFilter(k.start_time)
+)
 SELECT
-    src.service_name as source,
-    tgt.service_name as target,
-    tgt.span_name,
-    sum(tgt.duration_ms) as total_exec_ms,
-    avg(tgt.duration_ms) as avg_exec_ms,
-    approx_percentile(0.95, percentile_agg(tgt.duration_ms)) as duration_p95
-FROM ps_trace.span src
-INNER JOIN ps_trace.span tgt
-ON (src.trace_id = tgt.trace_id
-AND src.span_id = tgt.parent_span_id
-AND src.service_name != tgt.service_name)
-WHERE $__timeFilter(src.start_time)
-AND $__timeFilter(tgt.start_time)
-GROUP BY 1, 2, 3
-ORDER BY total_exec_ms DESC
+    x.service_name,
+    x.span_name,
+    x.dist,
+    approx_percentile(0.95, percentile_agg(x.duration_ms)) as duration_p95
+FROM x
+WHERE x.dist != 0
+GROUP BY x.service_name, x.span_name, x.dist
+ORDER BY x.dist
+```
+
+#### Upstream Spans Graph
+
+![Upstream Spans Graph](/assets/upstream-spans-graph.png)
+
+```sql
+-- nodes
+WITH RECURSIVE x AS
+(
+    SELECT
+        s.trace_id,
+        s.span_id,
+        s.parent_span_id,
+        s.service_name,
+        s.span_name
+    FROM ps_trace.span s
+    WHERE $__timeFilter(s.start_time)
+    AND s.service_name = '$service'
+    AND s.span_name = '$span_name'
+    UNION ALL
+    SELECT
+        p.trace_id,
+        p.span_id,
+        p.parent_span_id,
+        p.service_name,
+        p.span_name
+    FROM ps_trace.span p
+    INNER JOIN x 
+    ON (p.trace_id = x.trace_id
+    AND p.span_id = x.parent_span_id)
+    WHERE $__timeFilter(p.start_time)
+)
+SELECT DISTINCT
+    concat(x.service_name, '|', x.span_name) as id,
+    x.service_name as title,
+    x.span_name as "subTitle"
+FROM x
+```
+
+```sql
+-- edges
+WITH RECURSIVE x AS
+(
+    SELECT
+        s.trace_id,
+        s.span_id,
+        s.parent_span_id,
+        s.service_name,
+        s.span_name,
+        null::text as child_service_name,
+        null::text as child_span_name
+    FROM ps_trace.span s
+    WHERE $__timeFilter(s.start_time)
+    AND s.service_name = '$service'
+    AND s.span_name = '$span_name'
+    UNION ALL
+    SELECT
+        p.trace_id,
+        p.span_id,
+        p.parent_span_id,
+        p.service_name,
+        p.span_name,
+        x.service_name as child_service_name,
+        x.span_name as child_span_name
+    FROM ps_trace.span p
+    INNER JOIN x 
+    ON (p.trace_id = x.trace_id
+    AND p.span_id = x.parent_span_id)
+    WHERE $__timeFilter(p.start_time)
+)
+SELECT DISTINCT
+    concat(
+        x.child_service_name, '|', 
+        x.child_span_name, '|', 
+        x.service_name, '|', 
+        x.span_name
+    ) as id,
+    concat(x.service_name, '|', x.span_name) as source,
+    concat(x.child_service_name, '|', x.child_span_name) as target,
+FROM x
+WHERE x.child_service_name IS NOT NULL
+```
+
+#### Downstream Spans Graph
+
+![Downstream Spans Graph](/assets/downstream-spans-graph.png)
+
+```sql
+-- nodes
+WITH RECURSIVE x AS
+(
+    SELECT
+        s.trace_id,
+        s.span_id,
+        s.parent_span_id,
+        s.service_name,
+        s.span_name
+    FROM ps_trace.span s
+    WHERE $__timeFilter(s.start_time)
+    AND s.service_name = '$service'
+    AND s.span_name = '$span_name'
+    UNION ALL
+    SELECT
+        k.trace_id,
+        k.span_id,
+        k.parent_span_id,
+        k.service_name,
+        k.span_name
+    FROM ps_trace.span k
+    INNER JOIN x 
+    ON (k.trace_id = x.trace_id
+    AND k.parent_span_id = x.span_id)
+    WHERE $__timeFilter(k.start_time)
+)
+SELECT DISTINCT
+    concat(x.service_name, '|', x.span_name) as id,
+    x.service_name as title,
+    x.span_name as "subTitle"
+FROM x
+```
+
+```sql
+-- edges
+WITH RECURSIVE x AS
+(
+    SELECT
+        s.trace_id,
+        s.span_id,
+        s.parent_span_id,
+        s.service_name,
+        s.span_name,
+        null::text as parent_service_name,
+        null::text as parent_span_name
+    FROM ps_trace.span s
+    WHERE $__timeFilter(s.start_time)
+    AND s.service_name = '$service'
+    AND s.span_name = '$span_name'
+    UNION ALL
+    SELECT
+        k.trace_id,
+        k.span_id,
+        k.parent_span_id,
+        k.service_name,
+        k.span_name,
+        x.service_name as parent_service_name,
+        x.span_name as parent_span_name
+    FROM ps_trace.span k
+    INNER JOIN x 
+    ON (k.trace_id = x.trace_id
+    AND k.parent_span_id = x.span_id)
+    WHERE $__timeFilter(k.start_time)
+)
+SELECT DISTINCT
+    concat(
+        x.service_name, '|', 
+        x.span_name, '|',
+        x.parent_service_name, '|', 
+        x.parent_span_name
+    ) as id,
+    concat(x.parent_service_name, '|', x.parent_span_name) as source,
+    concat(x.service_name, '|', x.span_name) as target
+FROM x
+WHERE x.parent_service_name IS NOT NULL
 ```

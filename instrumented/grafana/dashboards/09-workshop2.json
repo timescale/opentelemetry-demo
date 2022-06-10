@@ -1,0 +1,431 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 11,
+  "iteration": 1654888230498,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "duration_p95"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "8.3.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "d7b6774ba1c1420aafd3b7ddfc9064c8"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "/*\nWITH RECURSIVE x AS\n(\n    SELECT\n        s.trace_id,\n        s.span_id,\n        s.parent_span_id,\n        s.service_name,\n        s.span_name,\n        s.duration_ms,\n        0::int as dist\n    FROM ps_trace.span s\n    WHERE $__timeFilter(s.start_time)\n    AND s.service_name = '$service'\n    AND s.span_name = '$span_name'\n    UNION ALL\n    SELECT\n        p.trace_id,\n        p.span_id,\n        p.parent_span_id,\n        p.service_name,\n        p.span_name,\n        p.duration_ms,\n        x.dist + 1 as dist\n    FROM ps_trace.span p\n    INNER JOIN x \n    ON (p.trace_id = x.trace_id\n    AND p.span_id = x.parent_span_id)\n    WHERE $__timeFilter(p.start_time)\n)\nSELECT\n    x.service_name,\n    x.span_name,\n    x.dist,\n    approx_percentile(0.95, percentile_agg(x.duration_ms)) as duration_p95\nFROM x\nWHERE x.dist != 0\nGROUP BY x.service_name, x.span_name, x.dist\nORDER BY x.dist\n*/",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "span_duration_ms"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "event",
+          "timeColumn": "\"time\"",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Upstream Spans",
+      "type": "table"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "duration_p95"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "ms"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 4,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "8.3.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "d7b6774ba1c1420aafd3b7ddfc9064c8"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "/*\nWITH RECURSIVE x AS\n(\n    SELECT\n        s.trace_id,\n        s.span_id,\n        s.parent_span_id,\n        s.service_name,\n        s.span_name,\n        s.duration_ms,\n        0::int as dist\n    FROM ps_trace.span s\n    WHERE $__timeFilter(s.start_time)\n    AND s.service_name = '$service'\n    AND s.span_name = '$span_name'\n    UNION ALL\n    SELECT\n        k.trace_id,\n        k.span_id,\n        k.parent_span_id,\n        k.service_name,\n        k.span_name,\n        k.duration_ms,\n        x.dist + 1 as dist\n    FROM ps_trace.span k\n    INNER JOIN x \n    ON (k.trace_id = x.trace_id\n    AND k.parent_span_id = x.span_id)\n    WHERE $__timeFilter(k.start_time)\n)\nSELECT\n    x.service_name,\n    x.span_name,\n    x.dist,\n    approx_percentile(0.95, percentile_agg(x.duration_ms)) as duration_p95\nFROM x\nWHERE x.dist != 0\nGROUP BY x.service_name, x.span_name, x.dist\nORDER BY x.dist\n*/",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "span_duration_ms"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "event",
+          "timeColumn": "\"time\"",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Downstream Spans",
+      "type": "table"
+    },
+    {
+      "gridPos": {
+        "h": 13,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "id": 6,
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "d7b6774ba1c1420aafd3b7ddfc9064c8"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "/*\n-- nodes\nWITH RECURSIVE x AS\n(\n    SELECT\n        s.trace_id,\n        s.span_id,\n        s.parent_span_id,\n        s.service_name,\n        s.span_name\n    FROM ps_trace.span s\n    WHERE $__timeFilter(s.start_time)\n    AND s.service_name = '$service'\n    AND s.span_name = '$span_name'\n    UNION ALL\n    SELECT\n        p.trace_id,\n        p.span_id,\n        p.parent_span_id,\n        p.service_name,\n        p.span_name\n    FROM ps_trace.span p\n    INNER JOIN x \n    ON (p.trace_id = x.trace_id\n    AND p.span_id = x.parent_span_id)\n    WHERE $__timeFilter(p.start_time)\n)\nSELECT DISTINCT\n    concat(x.service_name, '|', x.span_name) as id,\n    x.service_name as title,\n    x.span_name as \"subTitle\"\nFROM x\n*/",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "span_duration_ms"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "event",
+          "timeColumn": "\"time\"",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "d7b6774ba1c1420aafd3b7ddfc9064c8"
+          },
+          "format": "table",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "/*\n-- edges\nWITH RECURSIVE x AS\n(\n    SELECT\n        s.trace_id,\n        s.span_id,\n        s.parent_span_id,\n        s.service_name,\n        s.span_name,\n        null::text as child_service_name,\n        null::text as child_span_name\n    FROM ps_trace.span s\n    WHERE $__timeFilter(s.start_time)\n    AND s.service_name = '$service'\n    AND s.span_name = '$span_name'\n    UNION ALL\n    SELECT\n        p.trace_id,\n        p.span_id,\n        p.parent_span_id,\n        p.service_name,\n        p.span_name,\n        x.service_name as child_service_name,\n        x.span_name as child_span_name\n    FROM ps_trace.span p\n    INNER JOIN x \n    ON (p.trace_id = x.trace_id\n    AND p.span_id = x.parent_span_id)\n    WHERE $__timeFilter(p.start_time)\n)\nSELECT DISTINCT\n    concat(\n        x.child_service_name, '|', \n        x.child_span_name, '|', \n        x.service_name, '|', \n        x.span_name\n    ) as id,\n    concat(x.child_service_name, '|', x.child_span_name) as source,\n    concat(x.service_name, '|', x.span_name) as target\nFROM x\nWHERE x.child_service_name IS NOT NULL\n*/",
+          "refId": "B",
+          "select": [
+            [
+              {
+                "params": [
+                  "span_duration_ms"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "event",
+          "timeColumn": "\"time\"",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Upstream Spans",
+      "type": "nodeGraph"
+    },
+    {
+      "gridPos": {
+        "h": 13,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "id": 8,
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "d7b6774ba1c1420aafd3b7ddfc9064c8"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "/*\n-- nodes\nWITH RECURSIVE x AS\n(\n    SELECT\n        s.trace_id,\n        s.span_id,\n        s.parent_span_id,\n        s.service_name,\n        s.span_name\n    FROM ps_trace.span s\n    WHERE $__timeFilter(s.start_time)\n    AND s.service_name = '$service'\n    AND s.span_name = '$span_name'\n    UNION ALL\n    SELECT\n        k.trace_id,\n        k.span_id,\n        k.parent_span_id,\n        k.service_name,\n        k.span_name\n    FROM ps_trace.span k\n    INNER JOIN x \n    ON (k.trace_id = x.trace_id\n    AND k.parent_span_id = x.span_id)\n    WHERE $__timeFilter(k.start_time)\n)\nSELECT DISTINCT\n    concat(x.service_name, '|', x.span_name) as id,\n    x.service_name as title,\n    x.span_name as \"subTitle\"\nFROM x\n*/",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "span_duration_ms"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "event",
+          "timeColumn": "\"time\"",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "d7b6774ba1c1420aafd3b7ddfc9064c8"
+          },
+          "format": "table",
+          "group": [],
+          "hide": false,
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "/*\n-- edges\nWITH RECURSIVE x AS\n(\n    SELECT\n        s.trace_id,\n        s.span_id,\n        s.parent_span_id,\n        s.service_name,\n        s.span_name,\n        null::text as parent_service_name,\n        null::text as parent_span_name\n    FROM ps_trace.span s\n    WHERE $__timeFilter(s.start_time)\n    AND s.service_name = '$service'\n    AND s.span_name = '$span_name'\n    UNION ALL\n    SELECT\n        k.trace_id,\n        k.span_id,\n        k.parent_span_id,\n        k.service_name,\n        k.span_name,\n        x.service_name as parent_service_name,\n        x.span_name as parent_span_name\n    FROM ps_trace.span k\n    INNER JOIN x \n    ON (k.trace_id = x.trace_id\n    AND k.parent_span_id = x.span_id)\n    WHERE $__timeFilter(k.start_time)\n)\nSELECT DISTINCT\n    concat(\n        x.service_name, '|', \n        x.span_name, '|',\n        x.parent_service_name, '|', \n        x.parent_span_name\n    ) as id,\n    concat(x.parent_service_name, '|', x.parent_span_name) as source,\n    concat(x.service_name, '|', x.span_name) as target\nFROM x\nWHERE x.parent_service_name IS NOT NULL\n*/",
+          "refId": "B",
+          "select": [
+            [
+              {
+                "params": [
+                  "span_duration_ms"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "event",
+          "timeColumn": "\"time\"",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Downstream Spans",
+      "type": "nodeGraph"
+    }
+  ],
+  "schemaVersion": 34,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "lower",
+          "value": "lower"
+        },
+        "definition": "SELECT DISTINCT service_name FROM ps_trace.span WHERE start_time > now() - interval '1 minute';",
+        "hide": 0,
+        "includeAll": false,
+        "label": "service",
+        "multi": false,
+        "name": "service",
+        "options": [],
+        "query": "SELECT DISTINCT service_name FROM ps_trace.span WHERE start_time > now() - interval '1 minute';",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "GET /",
+          "value": "GET /"
+        },
+        "definition": "SELECT DISTINCT s.span_name FROM ps_trace.span s WHERE s.start_time > now() - interval '1 minute' AND s.service_name = '$service'",
+        "hide": 0,
+        "includeAll": false,
+        "label": "span name",
+        "multi": false,
+        "name": "span_name",
+        "options": [],
+        "query": "SELECT DISTINCT s.span_name FROM ps_trace.span s WHERE s.start_time > now() - interval '1 minute' AND s.service_name = '$service'",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "09 Workshop 2",
+  "uid": "gRq8Gdjnz",
+  "version": 13,
+  "weekStart": ""
+}
