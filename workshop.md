@@ -1,4 +1,6 @@
 
+# OpenTelemetry Tracing Workshop
+
 ## Prerequisites
 
 1. The demo system runs in Docker. You'll need [Docker](https://www.docker.com/products/docker-desktop/) installed.
@@ -91,9 +93,10 @@ SELECT * FROM ps_trace.span s WHERE s.start_time BETWEEN <start> AND <end>;
 
 ### Dashboard 1
 
-The first dashboard is [here](http://localhost:3000/d/RHrebSCnk/dashboard-1?orgId=1).
+The first dashboard is [here](http://localhost:3000/d/RHrebSCnk/07-dashboard-1?orgId=1&refresh=1m).
 The SQL queries in each panel are commented out. 
 As we discuss each, uncomment the query, and the panel will start working.
+There is a copy of the dashboard with all the queries uncommented [here](http://localhost:3000/d/P0oHCvC7k/08-dashboard-1-finished?orgId=1&refresh=1m).
 #### Trace Count
 
 ![Trace Count](/assets/trace-count.png)

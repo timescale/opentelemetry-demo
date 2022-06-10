@@ -97,7 +97,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n    s.trace_id,\n    s.duration_ms\nFROM ps_trace.span s\nWHERE $__timeFilter(s.start_time) -- s.start_time > now() - interval '15 minutes'\nAND s.parent_span_id IS NULL -- only root spans\nORDER BY s.duration_ms DESC\nLIMIT 10",
+          "rawSql": "/*\nSELECT\n    s.trace_id,\n    s.duration_ms\nFROM ps_trace.span s\nWHERE $__timeFilter(s.start_time) -- s.start_time > now() - interval '15 minutes'\nAND s.parent_span_id IS NULL -- only root spans\nORDER BY s.duration_ms DESC\nLIMIT 10\n*/",
           "refId": "A",
           "select": [
             [
@@ -185,7 +185,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n    s.trace_id,\n    s.duration_ms\nFROM ps_trace.span s\nWHERE $__timeFilter(s.start_time) -- s.start_time > now() - interval '15 minutes'\nAND s.parent_span_id IS NULL -- only root spans",
+          "rawSql": "/*\nSELECT\n    s.trace_id,\n    s.duration_ms\nFROM ps_trace.span s\nWHERE $__timeFilter(s.start_time)\nAND s.parent_span_id IS NULL -- only root spans\n*/",
           "refId": "A",
           "select": [
             [
@@ -209,7 +209,7 @@
           ]
         }
       ],
-      "title": "Histogram of Trace Durations",
+      "title": "Histogram of Latencies",
       "type": "histogram"
     },
     {
@@ -267,7 +267,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT count(*) as nbr_traces\nFROM ps_trace.span s\nWHERE $__timeFilter(s.start_time) -- s.start_time > now() - interval '15 minutes'\nAND s.parent_span_id IS NULL -- only root spans",
+          "rawSql": "/*\nSELECT count(*) as nbr_traces\nFROM ps_trace.span s\nWHERE $__timeFilter(s.start_time)\nAND s.parent_span_id IS NULL\n*/",
           "refId": "A",
           "select": [
             [
@@ -372,7 +372,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n    time_bucket('10 seconds', s.start_time) as time,\n    count(*) as nbr_traces\nFROM ps_trace.span s\nWHERE $__timeFilter(s.start_time) -- s.start_time > now() - interval '15 minutes'\nAND s.parent_span_id IS NULL -- only root spans\nGROUP BY time\nORDER BY time",
+          "rawSql": "/*\nSELECT\n    time_bucket('10 seconds', s.start_time) as time,\n    count(*) as nbr_traces\nFROM ps_trace.span s\nWHERE $__timeFilter(s.start_time) -- s.start_time > now()\nAND s.parent_span_id IS NULL -- only root spans\nGROUP BY time\nORDER BY time\n*/",
           "refId": "A",
           "select": [
             [
@@ -396,7 +396,7 @@
           ]
         }
       ],
-      "title": "Trace Count",
+      "title": "Throughput",
       "type": "timeseries"
     },
     {
@@ -478,7 +478,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n    time_bucket('10 second', s.start_time) as time,\n    approx_percentile(0.95, percentile_agg(s.duration_ms)) as duration_p95\nFROM ps_trace.span s\nWHERE $__timeFilter(s.start_time)\nAND s.parent_span_id IS NULL\nGROUP BY time\nORDER BY time",
+          "rawSql": "/*\nSELECT\n    time_bucket('10 second', s.start_time) as time,\n    approx_percentile(0.95, percentile_agg(s.duration_ms)) as duration_p95\nFROM ps_trace.span s\nWHERE $__timeFilter(s.start_time)\nAND s.parent_span_id IS NULL\nGROUP BY time\nORDER BY time\n*/",
           "refId": "A",
           "select": [
             [
@@ -502,7 +502,7 @@
           ]
         }
       ],
-      "title": "P95 Duration",
+      "title": "P95 Latencies",
       "type": "timeseries"
     },
     {
@@ -539,7 +539,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n    time_bucket('10 seconds', s.start_time) as time,\n    s.duration_ms\nFROM ps_trace.span s\nWHERE $__timeFilter(s.start_time)\nAND s.parent_span_id IS NULL",
+          "rawSql": "/*\nSELECT\n    time_bucket('10 seconds', s.start_time) as time,\n    s.duration_ms\nFROM ps_trace.span s\nWHERE $__timeFilter(s.start_time)\nAND s.parent_span_id IS NULL\n*/",
           "refId": "A",
           "select": [
             [
@@ -563,7 +563,7 @@
           ]
         }
       ],
-      "title": "Histogram of Trace Durations",
+      "title": "Histogram of Latencies",
       "tooltip": {
         "show": true,
         "showHistogram": true
@@ -658,7 +658,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n    time_bucket('10 seconds', s.start_time) as time,\n    s.service_name || ' ' || s.span_name as operation,\n    sum(\n        s.duration_ms -\n        coalesce(\n        (\n            -- the sum of the durations of the direct children\n            SELECT sum(k.duration_ms)\n            FROM ps_trace.span k\n            WHERE k.trace_id = s.trace_id\n            AND k.parent_span_id = s.span_id\n            AND $__timeFilter(k.start_time)\n        ), 0)\n    ) as total_exec_ms\nFROM ps_trace.span s\nWHERE $__timeFilter(s.start_time)\nGROUP BY time, s.service_name, s.span_name\nORDER BY time, total_exec_ms",
+          "rawSql": "/*\nSELECT\n    time_bucket('10 seconds', s.start_time) as time,\n    s.service_name || ' ' || s.span_name as operation,\n    sum(\n        s.duration_ms -\n        coalesce(\n        (\n            -- the sum of the durations of the direct children\n            SELECT sum(k.duration_ms)\n            FROM ps_trace.span k\n            WHERE k.trace_id = s.trace_id\n            AND k.parent_span_id = s.span_id\n            AND $__timeFilter(k.start_time)\n        ), 0)\n    ) as total_exec_ms\nFROM ps_trace.span s\nWHERE $__timeFilter(s.start_time)\nGROUP BY time, s.service_name, s.span_name\nORDER BY time, total_exec_ms\n*/",
           "refId": "A",
           "select": [
             [
@@ -743,7 +743,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n    s.service_name || ' ' || s.span_name as operation,\n    sum(\n        s.duration_ms -\n        coalesce(\n        (\n            -- the sum of the durations of the direct children\n            SELECT sum(k.duration_ms)\n            FROM ps_trace.span k\n            WHERE k.trace_id = s.trace_id\n            AND k.parent_span_id = s.span_id\n            AND $__timeFilter(k.start_time)\n        ), 0)\n    ) as total_exec_ms\nFROM ps_trace.span s\nWHERE $__timeFilter(s.start_time)\nGROUP BY s.service_name, s.span_name",
+          "rawSql": "/*\nSELECT\n    s.service_name || ' ' || s.span_name as operation,\n    sum(\n        s.duration_ms -\n        coalesce(\n        (\n            -- the sum of the durations of the direct children\n            SELECT sum(k.duration_ms)\n            FROM ps_trace.span k\n            WHERE k.trace_id = s.trace_id\n            AND k.parent_span_id = s.span_id\n            AND $__timeFilter(k.start_time)\n        ), 0)\n    ) as total_exec_ms\nFROM ps_trace.span s\nWHERE $__timeFilter(s.start_time)\nGROUP BY s.service_name, s.span_name\n*/",
           "refId": "A",
           "select": [
             [
@@ -827,7 +827,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT \n    x.service_name,\n    x.span_name,\n    avg(x.duration_ms) as avg_duration_ms,\n    approx_percentile(0.95, percentile_agg(x.duration_ms)) as duration_p95\nFROM\n(\n    SELECT\n        s.trace_id,\n        s.service_name,\n        s.span_name,\n        sum(\n            s.duration_ms -\n            coalesce(\n            (\n                -- the sum of the durations of the direct children\n                SELECT sum(k.duration_ms)\n                FROM ps_trace.span k\n                WHERE k.trace_id = s.trace_id\n                AND k.parent_span_id = s.span_id\n                AND $__timeFilter(k.start_time)\n            ), 0)\n        ) as duration_ms\n    FROM ps_trace.span s\n    WHERE $__timeFilter(s.start_time)\n    GROUP BY s.trace_id, s.service_name, s.span_name\n) x\nGROUP BY x.service_name, x.span_name\nORDER BY 4 DESC",
+          "rawSql": "/*\nSELECT \n    x.service_name,\n    x.span_name,\n    avg(x.duration_ms) as avg_duration_ms,\n    approx_percentile(0.95, percentile_agg(x.duration_ms)) as duration_p95\nFROM\n(\n    SELECT\n        s.trace_id,\n        s.service_name,\n        s.span_name,\n        sum(\n            s.duration_ms -\n            coalesce(\n            (\n                -- the sum of the durations of the direct children\n                SELECT sum(k.duration_ms)\n                FROM ps_trace.span k\n                WHERE k.trace_id = s.trace_id\n                AND k.parent_span_id = s.span_id\n                AND $__timeFilter(k.start_time)\n            ), 0)\n        ) as duration_ms\n    FROM ps_trace.span s\n    WHERE $__timeFilter(s.start_time)\n    GROUP BY s.trace_id, s.service_name, s.span_name\n) x\nGROUP BY x.service_name, x.span_name\nORDER BY 4 DESC\n*/",
           "refId": "A",
           "select": [
             [
@@ -863,13 +863,13 @@
     "list": []
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
-  "title": "empty",
+  "title": "07 Dashboard 1",
   "uid": "RHrebSCnk",
-  "version": 26,
+  "version": 31,
   "weekStart": ""
 }
