@@ -180,6 +180,22 @@ GROUP BY time
 ORDER BY time
 ```
 
+#### Histogram of Latencies over Time
+
+![Histogram of Latencies over Time](/assets/histogram-of-latencies-over-time.png)
+
+We have already built a histogram of latencies, but it was for the entire time window. What if we want to see how the histogram of latencies varies over time? In other words, let's see a histogram of latencies for every
+10 second bucket in the window. This will give us a more detailed picture of the variability over time.
+
+```sql
+SELECT
+    time_bucket('10 seconds', s.start_time) as time,
+    s.duration_ms
+FROM ps_trace.span s
+WHERE $__timeFilter(s.start_time)
+AND s.parent_span_id IS NULL
+```
+
 #### Operation Execution Time Pie Chart
 
 ![Operation Execution Time Pie Chart](/assets/operation-pie-chart.png)
@@ -217,6 +233,8 @@ GROUP BY s.service_name, s.span_name
 
 ![Operation Execution Times Table](/assets/operation-table.png)
 
+For each operation (combination of service and span names), let's compute the average duration and the P95 duration.
+
 ```sql
 SELECT 
     x.service_name,
@@ -252,6 +270,8 @@ ORDER BY 4 DESC
 #### Operation Execution Time over Time
 
 ![Operation Execution Time over Time](/assets/operation-time-over-time.png)
+
+We built a histogram of latencies over time. What if we want to know which operations are contributing most to the latencies? Let's compute the total execution time spent in each operation in each 10 second bucket in the time window. If we stack these values, it should show us the operations contributing most to latencies over time.
 
 ```sql
 SELECT
