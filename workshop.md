@@ -93,10 +93,10 @@ SELECT * FROM ps_trace.span s WHERE s.start_time BETWEEN <start> AND <end>;
 
 ### Dashboard 1
 
-The first dashboard is [here](http://localhost:3000/d/RHrebSCnk/07-dashboard-1?orgId=1&refresh=1m).
+The first dashboard is [here](http://localhost:3000/d/RHrebSCnk/07-workshop-1?orgId=1&refresh=1m).
 The SQL queries in each panel are commented out. 
 As we discuss each, uncomment the query, and the panel will start working.
-There is a copy of the dashboard with all the queries uncommented [here](http://localhost:3000/d/P0oHCvC7k/08-dashboard-1-finished?orgId=1&refresh=1m).
+There is a copy of the dashboard with all the queries uncommented [here](http://localhost:3000/d/P0oHCvC7k/08-workshop-1-finished?orgId=1&refresh=1m).
 #### Trace Count
 
 ![Trace Count](/assets/trace-count.png)
@@ -300,9 +300,15 @@ ORDER BY time, total_exec_ms
 
 ### Dashboard 2
 
+The first dashboard focused on the time series aspects of our tracing data, but it did not explore the structure of the traces. Our second dashboard will focus on visualizing the structure of the traces.
+
+The second dashboard is [here](http://localhost:3000/d/gRq8Gdjnz/09-workshop-2?orgId=1), and there is a copy of the dashboard with all the queries uncommented [here](http://localhost:3000/d/5ujdNdj7z/10-workshop-2-finished?orgId=1).
+
 #### Upstream Spans Table
 
 ![Upstream Spans Table](/assets/upstream-spans-table.png)
+
+Given a service name and a span name, we can use recursion to find all the spans that are upstream in all the traces in a given time window. In other words, "trace" the execution path from that span to back to where the request first entered the system.
 
 ```sql
 WITH RECURSIVE x AS
@@ -349,6 +355,8 @@ ORDER BY x.dist
 
 ![Downstream Spans Table](/assets/downstream-spans-table.png)
 
+By reversing the direction of our recursion, we can "trace" the execution downstream from a given span. In other words, we figure out all the spans that are called both directly and indirectly by the given span.
+
 ```sql
 WITH RECURSIVE x AS
 (
@@ -393,6 +401,8 @@ ORDER BY x.dist
 #### Upstream Spans Graph
 
 ![Upstream Spans Graph](/assets/upstream-spans-graph.png)
+
+The upstream and downstream tables are nice, but it is difficult to visualize the structure of the calls. We can use Grafana's Node Graph panel to draw the structure of the upstream and downstream calls trees. The Node Graph panel requires two queries. The first query identifies the distinct nodes. The second query identifies the distinct edges. We only need to make minor changes to the queries we already have to get this working.
 
 ```sql
 -- nodes
@@ -475,6 +485,10 @@ WHERE x.child_service_name IS NOT NULL
 #### Downstream Spans Graph
 
 ![Downstream Spans Graph](/assets/downstream-spans-graph.png)
+
+Creating the downstream graph is basically a one-line change to the two queries used for the upstream graph.
+Having both the upstream and the downstream graphs gives us a visualization of a span's place in the structure
+of the call tree from the perspective of that span. This can be a super powerful tool for understanding your system.
 
 ```sql
 -- nodes
