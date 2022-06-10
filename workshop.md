@@ -91,6 +91,9 @@ SELECT * FROM ps_trace.span s WHERE s.start_time BETWEEN <start> AND <end>;
 
 ### Dashboard 1
 
+The first dashboard is [here](http://localhost:3000/d/RHrebSCnk/dashboard-1?orgId=1).
+The SQL queries in each panel are commented out. 
+As we discuss each, uncomment the query, and the panel will start working.
 #### Trace Count
 
 ![Trace Count](/assets/trace-count.png)
@@ -144,6 +147,8 @@ LIMIT 10
 
 #### Histogram of Latencies
 
+![Histogram of Latencies](/assets/histogram-of-latencies.png)
+
 A root span's duration is equivalent to request latency. The only difference is that it does not include the network time to and from the client. It is just the processing time.
 
 Do all the requests take the same amount of time to process, or is there variation?
@@ -160,8 +165,9 @@ AND s.parent_span_id IS NULL
 
 #### P95 Latencies
 
-Do the latencies vary over time? Let's see how the P95 durations look over time.
+![P95 Latencies](/assets/p95-latencies.png)
 
+Do the latencies vary over time? Let's see how the P95 durations look over time.
 
 ```sql
 SELECT
@@ -175,6 +181,8 @@ ORDER BY time
 ```
 
 #### Operation Execution Time Pie Chart
+
+![Operation Execution Time Pie Chart](/assets/operation-pie-chart.png)
 
 Each span's duration encompasses both the time spent in the span itself AND any time spent in it's children. 
 If we want to know how much time was spent in the span alone, excluding the children, we can compute that.
@@ -206,6 +214,8 @@ GROUP BY s.service_name, s.span_name
 ```
 
 #### Operation Execution Times Table
+
+![Operation Execution Times Table](/assets/operation-table.png)
 
 ```sql
 SELECT 
@@ -240,6 +250,8 @@ ORDER BY 4 DESC
 ```
 
 #### Operation Execution Time over Time
+
+![Operation Execution Time over Time](/assets/operation-time-over-time.png)
 
 ```sql
 SELECT
