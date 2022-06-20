@@ -6,6 +6,10 @@
 1. The demo system runs in Docker. You'll need [Docker](https://www.docker.com/products/docker-desktop/) installed.
 2. You may prefer to have a PostgreSQL client installed, however it is not required.
 
+## Survey
+
+Please help us out by taking this [short survey](https://forms.gle/Dy8RZb49NbCSSrme6). Your feedback will help us build a better product.
+
 ## Setup
 
 ### Download the Demo System
