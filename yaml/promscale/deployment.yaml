@@ -22,13 +22,11 @@ spec:
           value: "10"
         - name: PROMSCALE_DB_URI
           value: postgres://postgres:password@timescaledb:5432/otel_demo?sslmode=allow
-        - name: PROMSCALE_ENABLE_FEATURE
-          value: tracing
-        - name: PROMSCALE_OTLP_GRPC_SERVER_LISTEN_ADDRESS
+        - name: PROMSCALE_TRACING_OTLP_SERVER_ADDRESS
           value: 0.0.0.0:9202
         - name: PROMSCALE_WEB_TELEMETRY_PATH
           value: /metrics-text
-        image: timescale/promscale:0.8.0
+        image: timescale/promscale:0.12.0
         name: promscale
         ports:
         - containerPort: 9201
