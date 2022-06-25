@@ -30,7 +30,7 @@ services:
       PROMSCALE_TRACING_OTLP_SERVER_ADDRESS: 0.0.0.0:9202
 
   jaeger:
-    image: jaegertracing/jaeger-query:1.30
+    image: jaegertracing/jaeger-query:1.35
     ports:
       - 16685:16685/tcp
       - 16686:16686/tcp
@@ -41,6 +41,8 @@ services:
     environment:
       SPAN_STORAGE_TYPE: grpc-plugin
       GRPC_STORAGE_SERVER: promscale:9202
+      METRICS_STORAGE_TYPE: prometheus
+      PROMETHEUS_SERVER_URL: http://promscale:9201
 
   grafana:
     build:
@@ -57,6 +59,7 @@ services:
   collector:
     build:
       context: ./instrumented/collector
+    command: --config /etc/otelcol/config.yaml
     ports:
       - 4317:4317/tcp
       - 4318:4318/tcp
