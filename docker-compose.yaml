@@ -15,7 +15,7 @@ services:
       - POSTGRES_HOST_AUTH_METHOD=trust
 
   promscale:
-    image: "timescale/promscale:0.11.0"
+    image: "timescale/promscale:0.12.0"
     ports:
       - 9201:9201/tcp
       - 9202:9202/tcp
