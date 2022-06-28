@@ -103,6 +103,8 @@ def generate() -> str:
         work(0.00001, 0.00001)
         pwlen = random.randint(8, 25)
         span.set_attribute('pwlen', pwlen)
+        span.set_attribute('isExpired', True)
+        span.set_attribute('isValid', False)
         i = 1
         while len(password) < pwlen:
             span.add_event(f"generate_loop_{i}", {'iteration': i})
