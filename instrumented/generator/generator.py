@@ -6,7 +6,7 @@ from flask import Flask
 import requests
 
 from opentelemetry import trace
-from opentelemetry.trace import StatusCode, Status
+from opentelemetry.trace import StatusCode, Status, SpanKind
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.sdk.resources import Resource
@@ -121,8 +121,9 @@ def generate() -> str:
 
 @app.route('/')
 def generator():
-    password = generate()
-    return { 'password': password }
+    with tracer.start_as_current_span("/", kind = SpanKind.SERVER) as span:
+        password = generate()
+        return { 'password': password }
 
 
 if __name__ == '__main__':
