@@ -11,19 +11,19 @@ deleteDatasources:
 datasources:
   - name: Promscale-Tracing
     type: jaeger
-    uid: a01e209e82a346dfbecd10bcb6143ee4
-    url: http://jaeger:16686/
+    uid: f78291126102e0f2e841734d1e90250257543042
+    url: promscale:9201
     editable: true
     isDefault: false
 
   - name: Promscale-SQL
     type: postgres
-    uid: d7b6774ba1c1420aafd3b7ddfc9064c8
+    uid: c4729dfb8ceeaa0372ef27403a3932695eee995d
     url: timescaledb:5432
     database: otel_demo
     user: postgres
     editable: true
-    isDefault: true
+    isDefault: false
     jsonData:
       sslmode: 'disable'
       maxOpenConns: 10
@@ -31,3 +31,12 @@ datasources:
       connMaxLifetime: 14400
       postgresVersion: 1400
       timescaledb: true
+
+  - name: Promscale-PromQL
+    type: prometheus
+    url: http://promscale:9201
+    isDefault: true
+    editable: true
+    access: proxy
+    # SHA256 of datasource name cut to 40 chars as in: `sha256sum <<< Promscale-PromQL | cut -c1-40`
+    uid: dc08d25c8f267b054f12002f334e6d3d32a853e4
