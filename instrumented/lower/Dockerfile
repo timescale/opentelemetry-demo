@@ -3,7 +3,7 @@ WORKDIR /code
 COPY Gemfile .
 
 RUN bundle install
-COPY ./ /code
+COPY ./ .
 
 EXPOSE 5000
 

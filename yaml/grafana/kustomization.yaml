@@ -8,15 +8,15 @@ resources:
 configMapGenerator:
 - name: grafana-datasources-config
   files:
-  - ./datasources.yaml
+  - ./../../instrumented/grafana/datasources.yaml
 - name: grafana-dashboards-config
   files:
-  - ./dashboards.yaml
+  - ./../../instrumented/grafana/dashboards.yaml
 - name: grafana-dashboards-data
   files:
-  - ./dashboards/01-request-rate.json
-  - ./dashboards/02-error-rates.json
-  - ./dashboards/03-request-durations.json
-  - ./dashboards/04-service-dependencies.json
-  - ./dashboards/05-upstream-spans.json
-  - ./dashboards/06-downstream-spans.json
+  - ./../../instrumented/grafana/dashboards/01-request-rate.json
+  - ./../../instrumented/grafana/dashboards/02-error-rates.json
+  - ./../../instrumented/grafana/dashboards/03-request-durations.json
+  - ./../../instrumented/grafana/dashboards/04-service-dependencies.json
+  - ./../../instrumented/grafana/dashboards/05-upstream-spans.json
+  - ./../../instrumented/grafana/dashboards/06-downstream-spans.json

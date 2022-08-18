@@ -39,7 +39,7 @@
           {
             "datasource": {
               "type": "postgres",
-              "uid": "d7b6774ba1c1420aafd3b7ddfc9064c8"
+              "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
             },
             "format": "table",
             "group": [],
@@ -71,7 +71,7 @@
           {
             "datasource": {
               "type": "postgres",
-              "uid": "d7b6774ba1c1420aafd3b7ddfc9064c8"
+              "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
             },
             "format": "table",
             "group": [],
