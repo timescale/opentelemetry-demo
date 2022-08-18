@@ -19,7 +19,7 @@ spec:
       containers:
       - env:
         - name: POSTGRES_DB
-          value: otel_demo
+          value: tsdb
         - name: POSTGRES_HOST_AUTH_METHOD
           value: trust
         - name: POSTGRES_USER

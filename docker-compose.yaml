@@ -11,11 +11,11 @@ services:
       - 5999:5432/tcp
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_DB=otel_demo
+      - POSTGRES_DB=tsdb
       - POSTGRES_HOST_AUTH_METHOD=trust
 
   promscale:
-    image: "timescale/promscale:0.11.0"
+    image: "timescale/promscale:latest"
     ports:
       - 9201:9201/tcp
       - 9202:9202/tcp
@@ -24,13 +24,10 @@ services:
       - timescaledb
     environment:
       PROMSCALE_DB_CONNECT_RETRIES: 10
-      PROMSCALE_WEB_TELEMETRY_PATH: /metrics-text
-      PROMSCALE_DB_URI: postgres://postgres:password@timescaledb:5432/otel_demo?sslmode=allow
-      PROMSCALE_ENABLE_FEATURE: tracing
-      PROMSCALE_TRACING_OTLP_SERVER_ADDRESS: 0.0.0.0:9202
+      PROMSCALE_DB_URI: postgres://postgres:password@timescaledb:5432/tsdb?sslmode=allow
 
   jaeger:
-    image: jaegertracing/jaeger-query:1.30
+    image: jaegertracing/jaeger-query:1.35
     ports:
       - 16685:16685/tcp
       - 16686:16686/tcp

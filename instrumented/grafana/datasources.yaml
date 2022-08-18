@@ -20,7 +20,7 @@ datasources:
     type: postgres
     uid: c4729dfb8ceeaa0372ef27403a3932695eee995d
     url: timescaledb:5432
-    database: otel_demo
+    database: tsdb
     user: postgres
     editable: true
     isDefault: false

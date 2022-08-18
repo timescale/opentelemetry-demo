@@ -21,8 +21,8 @@
     "editable": true,
     "fiscalYearStartMonth": 0,
     "graphTooltip": 0,
-    "id": 11,
-    "iteration": 1642711372312,
+    "id": 5,
+    "iteration": 1652561709973,
     "links": [],
     "liveNow": false,
     "panels": [
@@ -80,13 +80,13 @@
           {
             "datasource": {
               "type": "postgres",
-              "uid": "d7b6774ba1c1420aafd3b7ddfc9064c8"
+              "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
             },
             "format": "table",
             "group": [],
             "metricColumn": "none",
             "rawQuery": true,
-            "rawSql": "SELECT\n    service_name,\n    count(*) as num_err\nFROM ps_trace.span\nWHERE $__timeFilter(start_time)\nAND status_code = 'STATUS_CODE_ERROR'\nGROUP BY 1",
+            "rawSql": "SELECT\n    service_name,\n    count(*) as num_err\nFROM ps_trace.span\nWHERE $__timeFilter(start_time)\nAND status_code = 'error'\nGROUP BY 1",
             "refId": "A",
             "select": [
               [
@@ -232,13 +232,13 @@
           {
             "datasource": {
               "type": "postgres",
-              "uid": "d7b6774ba1c1420aafd3b7ddfc9064c8"
+              "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
             },
             "format": "table",
             "group": [],
             "metricColumn": "none",
             "rawQuery": true,
-            "rawSql": "SELECT\n    x.service_name,\n    x.span_name,\n    x.num_err::numeric / x.num_total as err_rate\nFROM\n(\n    SELECT\n        service_name,\n        span_name,\n        count(*) filter (where status_code = 'STATUS_CODE_ERROR') as num_err,\n        count(*) as num_total\n    FROM ps_trace.span\n    WHERE $__timeFilter(start_time)\n    AND (service_name IN (${service:sqlstring}))\n    AND (span_name IN (${operation:sqlstring}))\n    GROUP BY 1, 2\n) x\nORDER BY err_rate desc",
+            "rawSql": "SELECT\n    x.service_name,\n    x.span_name,\n    x.num_err::numeric / x.num_total as err_rate\nFROM\n(\n    SELECT\n        service_name,\n        span_name,\n        count(*) filter (where status_code = 'error') as num_err,\n        count(*) as num_total\n    FROM ps_trace.span\n    WHERE $__timeFilter(start_time)\n    AND service_name = '${service}'\n    GROUP BY 1, 2\n) x\nORDER BY err_rate desc",
             "refId": "A",
             "select": [
               [
@@ -352,13 +352,13 @@
           {
             "datasource": {
               "type": "postgres",
-              "uid": "d7b6774ba1c1420aafd3b7ddfc9064c8"
+              "uid": "c4729dfb8ceeaa0372ef27403a3932695eee995d"
             },
             "format": "time_series",
             "group": [],
             "metricColumn": "none",
             "rawQuery": true,
-            "rawSql": "SELECT\n    x.time,\n    x.service_name,\n    x.span_name,\n    x.num_err::numeric / x.num_total as err_rate\nFROM\n(\n    SELECT\n        time_bucket('1 minute', start_time) as time,\n        service_name,\n        span_name,\n        count(*) filter (where status_code = 'STATUS_CODE_ERROR') as num_err,\n        count(*) as num_total\n    FROM ps_trace.span\n    WHERE $__timeFilter(start_time)\n    AND (service_name IN (${service:sqlstring}))\n    AND (span_name IN (${operation:sqlstring}))\n    GROUP BY 1, 2, 3\n) x\nORDER BY time",
+            "rawSql": "SELECT\n    x.time,\n    x.service_name,\n    x.span_name,\n    x.num_err::numeric / x.num_total as err_rate\nFROM\n(\n    SELECT\n        time_bucket('1 minute', start_time) as time,\n        service_name,\n        span_name,\n        count(*) filter (where status_code = 'error') as num_err,\n        count(*) as num_total\n    FROM ps_trace.span\n    WHERE $__timeFilter(start_time)\n    AND service_name = '${service}'\n    GROUP BY 1, 2, 3\n) x\nORDER BY time",
             "refId": "A",
             "select": [
               [
@@ -394,99 +394,17 @@
         {
           "current": {
             "selected": true,
-            "text": [
-              "digit",
-              "generator",
-              "lower",
-              "special",
-              "upper"
-            ],
-            "value": [
-              "digit",
-              "generator",
-              "lower",
-              "special",
-              "upper"
-            ]
+            "text": "generator",
+            "value": "generator"
           },
           "definition": "SELECT value#>>'{}'\nFROM _ps_trace.tag\nWHERE key = 'service.name'",
           "hide": 0,
           "includeAll": false,
           "label": "Service",
-          "multi": true,
+          "multi": false,
           "name": "service",
           "options": [],
           "query": "SELECT value#>>'{}'\nFROM _ps_trace.tag\nWHERE key = 'service.name'",
-          "refresh": 1,
-          "regex": "",
-          "skipUrlSync": false,
-          "sort": 1,
-          "type": "query"
-        },
-        {
-          "current": {
-            "selected": true,
-            "text": [
-              "/",
-              "HTTP GET",
-              "extra_extra_process_upper",
-              "extra_process_digit",
-              "extra_process_special",
-              "extra_process_upper",
-              "generator.digits",
-              "generator.generate",
-              "generator.lowers",
-              "generator.specials",
-              "generator.uppers",
-              "get_digit",
-              "process_digit",
-              "process_lower",
-              "process_special",
-              "process_upper",
-              "random_digit",
-              "random_lower",
-              "random_special",
-              "random_upper",
-              "render_digit",
-              "render_lower",
-              "render_special",
-              "render_upper"
-            ],
-            "value": [
-              "/",
-              "HTTP GET",
-              "extra_extra_process_upper",
-              "extra_process_digit",
-              "extra_process_special",
-              "extra_process_upper",
-              "generator.digits",
-              "generator.generate",
-              "generator.lowers",
-              "generator.specials",
-              "generator.uppers",
-              "get_digit",
-              "process_digit",
-              "process_lower",
-              "process_special",
-              "process_upper",
-              "random_digit",
-              "random_lower",
-              "random_special",
-              "random_upper",
-              "render_digit",
-              "render_lower",
-              "render_special",
-              "render_upper"
-            ]
-          },
-          "definition": "SELECT DISTINCT span_name\nFROM _ps_trace.operation\nWHERE service_name_id IN\n(\n    SELECT id\n    FROM _ps_trace.tag\n    WHERE key = 'service.name'\n    AND value#>>'{}' IN (${service:sqlstring})\n)",
-          "hide": 0,
-          "includeAll": false,
-          "label": "Operation",
-          "multi": true,
-          "name": "operation",
-          "options": [],
-          "query": "SELECT DISTINCT span_name\nFROM _ps_trace.operation\nWHERE service_name_id IN\n(\n    SELECT id\n    FROM _ps_trace.tag\n    WHERE key = 'service.name'\n    AND value#>>'{}' IN (${service:sqlstring})\n)",
           "refresh": 1,
           "regex": "",
           "skipUrlSync": false,
@@ -503,6 +421,6 @@
     "timezone": "",
     "title": "02 Error Rates",
     "uid": "CiE9l917z",
-    "version": 7,
+    "version": 3,
     "weekStart": ""
   }
